@@ -52,6 +52,22 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        unbindService(connection)
+        apduServiceMessenger = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cardEmulation?.setPreferredService(this, ComponentName(this, ApduService::class.java));
+    }
+
+    override fun onPause() {
+        super.onPause()
+        cardEmulation?.unsetPreferredService(this)
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -109,6 +125,11 @@ class MainActivity : FlutterActivity() {
                         CardEmulation.CATEGORY_OTHER,
                         call.argument("aids")
                     )
+                    result.success(res)
+                }
+
+                "supportsAidPrefixRegistration" -> {
+                    val res = cardEmulation?.supportsAidPrefixRegistration()
                     result.success(res)
                 }
             }

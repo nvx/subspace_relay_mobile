@@ -202,7 +202,7 @@ return $default(_that.relayId,_that.mqttClientId,_that.cryptoKey);case _:
 
 
 class _RelayId implements RelayId {
-   _RelayId({required this.relayId, required this.mqttClientId, required this.cryptoKey});
+  const _RelayId({required this.relayId, required this.mqttClientId, required this.cryptoKey});
   
 
 @override final  String relayId;

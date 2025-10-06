@@ -9,6 +9,58 @@ part of 'hce.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(HceActive)
+const hceActiveProvider = HceActiveProvider._();
+
+final class HceActiveProvider extends $NotifierProvider<HceActive, bool> {
+  const HceActiveProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hceActiveProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hceActiveHash();
+
+  @$internal
+  @override
+  HceActive create() => HceActive();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$hceActiveHash() => r'584d1b5ed0b488b6762926315a359733002e632b';
+
+abstract class _$HceActive extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 @ProviderFor(Hce)
 const hceProvider = HceProvider._();
 
@@ -33,7 +85,7 @@ final class HceProvider
   Hce create() => Hce();
 }
 
-String _$hceHash() => r'a3b1f1bc9f212c6f905e515a7bf2c620aea61838';
+String _$hceHash() => r'020f959d3d69b54dc6c6929a5466f7262e99da9e';
 
 abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
   FutureOr<Stream<Uint8List?>> build();
@@ -55,12 +107,11 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
   }
 }
 
-@ProviderFor(hceRelay)
+@ProviderFor(HceRelay)
 const hceRelayProvider = HceRelayProvider._();
 
 final class HceRelayProvider
-    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
-    with $FutureModifier<void>, $FutureProvider<void> {
+    extends $AsyncNotifierProvider<HceRelay, HceState> {
   const HceRelayProvider._()
     : super(
         from: null,
@@ -77,13 +128,26 @@ final class HceRelayProvider
 
   @$internal
   @override
-  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<void> create(Ref ref) {
-    return hceRelay(ref);
-  }
+  HceRelay create() => HceRelay();
 }
 
-String _$hceRelayHash() => r'3db3dbe3327ed477bbcef72b325bbabc4aa8524b';
+String _$hceRelayHash() => r'4a680cc1ad244a229dfc62bc2a28320a060a200c';
+
+abstract class _$HceRelay extends $AsyncNotifier<HceState> {
+  FutureOr<HceState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<HceState>, HceState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<HceState>, HceState>,
+              AsyncValue<HceState>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

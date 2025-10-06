@@ -12,7 +12,7 @@ part 'relay_id.freezed.dart';
 
 @freezed
 sealed class RelayId with _$RelayId {
-  factory RelayId({required String relayId, required String mqttClientId, required SecretKey cryptoKey}) = _RelayId;
+  const factory RelayId({required String relayId, required String mqttClientId, required SecretKey cryptoKey}) = _RelayId;
 }
 
 @riverpod

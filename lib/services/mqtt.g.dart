@@ -9,32 +9,32 @@ part of 'mqtt.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(BrokerUri)
-const brokerUriProvider = BrokerUriProvider._();
+@ProviderFor(BrokerUrl)
+const brokerUrlProvider = BrokerUrlProvider._();
 
-final class BrokerUriProvider extends $AsyncNotifierProvider<BrokerUri, Uri> {
-  const BrokerUriProvider._()
+final class BrokerUrlProvider extends $AsyncNotifierProvider<BrokerUrl, Uri> {
+  const BrokerUrlProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'brokerUriProvider',
+        name: r'brokerUrlProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$brokerUriHash();
+  String debugGetCreateSourceHash() => _$brokerUrlHash();
 
   @$internal
   @override
-  BrokerUri create() => BrokerUri();
+  BrokerUrl create() => BrokerUrl();
 }
 
-String _$brokerUriHash() => r'25dc70f8308c9ab1e2c3630a590e4443846c5356';
+String _$brokerUrlHash() => r'd06cf1f90eeb912c5242b8199bdf3020b23f92d4';
 
-abstract class _$BrokerUri extends $AsyncNotifier<Uri> {
+abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
   FutureOr<Uri> build();
   @$mustCallSuper
   @override
@@ -77,7 +77,7 @@ final class MqttProvider
   Mqtt create() => Mqtt();
 }
 
-String _$mqttHash() => r'83219f30e52698a5ab7aadf6fb8dc52f02b0a645';
+String _$mqttHash() => r'a8fbaa306844afdd0d8f2b8a0aa5c0f5a8f7e377';
 
 abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
   FutureOr<Stream<RelayMessage>> build();

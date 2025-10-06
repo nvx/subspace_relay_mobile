@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:convert/convert.dart';
 import 'package:cryptography_plus/cryptography_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -7,7 +9,7 @@ import 'package:mqtt5_client/mqtt5_server_client.dart';
 import 'package:typed_data/typed_buffers.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'package:subspacerelay/subspacerelay.dart' as $pb;
+import 'package:subspace_relay_pb/subspace_relay_pb.dart' as $pb;
 
 import 'package:subspace_relay_mobile/services/prefs.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
@@ -16,8 +18,8 @@ part 'mqtt.g.dart';
 part 'mqtt.freezed.dart';
 
 @riverpod
-class BrokerUri extends _$BrokerUri {
-  static final _defaultBrokerUrl = Uri.parse(const String.fromEnvironment('BROKER_URL', defaultValue: 'mqtts://user:pass@example.com:1234'));
+class BrokerUrl extends _$BrokerUrl {
+  static final _defaultBrokerUrl = Uri.parse('mqtts://user:pass@example.com:8883');
 
   @override
   Future<Uri> build() async {
@@ -48,12 +50,19 @@ class BrokerUri extends _$BrokerUri {
 
 @freezed
 sealed class RelayMessage with _$RelayMessage {
-  factory RelayMessage({required $pb.Message message, required Uint8Buffer? correlationData}) = _RelayMessage;
+  const factory RelayMessage({required $pb.Message message, required RpcResponseMetadata? rpcResponseMetadata}) = _RelayMessage;
+}
+
+@freezed
+sealed class RpcResponseMetadata with _$RpcResponseMetadata {
+  const factory RpcResponseMetadata({required String? responseTopic, required Uint8Buffer? correlationData}) = _RpcResponseMetadata;
 }
 
 @riverpod
 class Mqtt extends _$Mqtt {
+  static final _random = Random.secure();
   static const _contentTypeProto = 'application/proto';
+  final _pendingRpc = <String, Completer<$pb.Message>>{};
   late StreamController<RelayMessage> _stream;
   late RelayId _relayId;
   late CipherWand _crypto;
@@ -63,6 +72,11 @@ class Mqtt extends _$Mqtt {
 
   @override
   Future<Stream<RelayMessage>> build() async {
+    _pendingRpc.forEach((_, completer) {
+      completer.completeError(Exception('connection lost'));
+    });
+    _pendingRpc.clear();
+
     _stream = StreamController<RelayMessage>();
     ref.onDispose(_stream.close);
 
@@ -73,22 +87,22 @@ class Mqtt extends _$Mqtt {
 
     _crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(_relayId.cryptoKey);
 
-    final brokerUri = await ref.watch(brokerUriProvider.future);
+    final brokerUrl = await ref.watch(brokerUrlProvider.future);
 
-    _client = MqttServerClient(brokerUri.host, _relayId.mqttClientId);
-    if (brokerUri.hasPort) {
-      _client.port = brokerUri.port;
+    _client = MqttServerClient(brokerUrl.host, _relayId.mqttClientId, maxConnectionAttempts: 99999999);
+    if (brokerUrl.hasPort) {
+      _client.port = brokerUrl.port;
     }
 
-    _client.secure = brokerUri.scheme == "mqtts";
+    _client.secure = brokerUrl.scheme == "mqtts";
     _client.keepAlivePeriod = 15;
     _client.autoReconnect = true;
     _client.resubscribeOnAutoReconnect = true;
 
     var connectionMessage = MqttConnectMessage().withClientIdentifier(_relayId.mqttClientId).keepAliveFor(MqttConstants.defaultKeepAlive).startClean();
 
-    if (brokerUri.userInfo.isNotEmpty) {
-      final parts = brokerUri.userInfo.split(':');
+    if (brokerUrl.userInfo.isNotEmpty) {
+      final parts = brokerUrl.userInfo.split(':');
       final username = parts[0];
       final password = parts.length == 1 ? null : parts.sublist(1).join(':');
       connectionMessage = connectionMessage.authenticateAs(username, password);
@@ -112,7 +126,31 @@ class Mqtt extends _$Mqtt {
     return _stream.stream;
   }
 
-  Future<void> send($pb.Message msg, {Uint8Buffer? correlationData, bool responseTopic = false}) async {
+  Future<void> log(String message) async {
+    await sendUnsolicited($pb.Message(log: $pb.Log(message: message)));
+  }
+
+  Future<void> sendUnsolicited($pb.Message msg) async {
+    await _send(msg);
+  }
+
+  Future<void> sendReply($pb.Message msg, RpcResponseMetadata? rpcResponseMetadata) async {
+    await _send(msg, topic: rpcResponseMetadata?.responseTopic, correlationData: rpcResponseMetadata?.correlationData);
+  }
+
+  Future<$pb.Message> rpc($pb.Message msg) async {
+    final correlationData = Uint8Buffer();
+    correlationData.addAll(List<int>.generate(16, (i) => _random.nextInt(256)));
+
+    final completer = Completer<$pb.Message>();
+    _pendingRpc[hex.encode(correlationData)] = completer;
+
+    await _send(msg, correlationData: correlationData, rpcRequest: true);
+
+    return completer.future;
+  }
+
+  Future<void> _send($pb.Message msg, {String? topic, Uint8Buffer? correlationData, bool rpcRequest = false}) async {
     final pbMessage = msg.writeToBuffer();
 
     final encryptedPayload = await _crypto.encrypt(pbMessage);
@@ -120,12 +158,24 @@ class Mqtt extends _$Mqtt {
     Uint8Buffer messageBuffer = Uint8Buffer();
     messageBuffer.addAll(encryptedPayload.concatenation());
 
-    var publishMsg = MqttPublishMessage().toTopic(_publishTopic).withQos(MqttQos.exactlyOnce).withContentType(_contentTypeProto).publishData(messageBuffer);
+    var publishMsg = MqttPublishMessage()
+        .toTopic(topic ?? _publishTopic)
+        .withQos(MqttQos.exactlyOnce)
+        .withContentType(_contentTypeProto)
+        .publishData(messageBuffer);
     if (correlationData != null) {
       publishMsg = publishMsg.withResponseCorrelationdata(correlationData);
     }
-    if (responseTopic) {
+    if (rpcRequest) {
       publishMsg = publishMsg.withResponseTopic(_subscribeTopic);
+    }
+
+    if (!ref.mounted) {
+      throw 'attempt to publish when disposed';
+    }
+
+    if (_client.published == null) {
+      throw 'publishing manager is null!';
     }
 
     _client.publishUserMessage(publishMsg);
@@ -159,6 +209,24 @@ class Mqtt extends _$Mqtt {
       print(pbMessage);
     }
 
-    _stream.add(RelayMessage(message: pbMessage, correlationData: msg.variableHeader?.correlationData));
+    final correlationData = msg.variableHeader?.correlationData;
+    if (correlationData != null && (msg.variableHeader?.responseTopic?.isEmpty ?? true)) {
+      // RPC Reply
+      final completer = _pendingRpc.remove(hex.encode(correlationData));
+      if (completer != null) {
+        completer.complete(pbMessage);
+        return;
+      }
+    }
+
+    RpcResponseMetadata? rpcResponseMetadata;
+    if (msg.variableHeader?.responseTopic != null || correlationData != null) {
+      String? responseTopic;
+      if ((msg.variableHeader?.responseTopic ?? '') != '') {
+        responseTopic = msg.variableHeader?.responseTopic;
+      }
+      rpcResponseMetadata = RpcResponseMetadata(responseTopic: responseTopic, correlationData: correlationData);
+    }
+    _stream.add(RelayMessage(message: pbMessage, rpcResponseMetadata: rpcResponseMetadata));
   }
 }
