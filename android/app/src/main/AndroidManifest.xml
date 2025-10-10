@@ -9,7 +9,7 @@
     <application
         android:label="Subspace Relay"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/sr_launcher">
         <service
             android:name=".ApduService"
             android:exported="true"
