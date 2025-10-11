@@ -29,9 +29,9 @@ android {
 
     defaultConfig {
         applicationId = "io.nv.subspacerelay.mobile"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // defaults defined at https://github.com/flutter/flutter/blob/master/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+        manifestPlaceholders["appTitle"] = "Subspace Relay"
+
+        // flutter defaults defined at https://github.com/flutter/flutter/blob/master/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
         minSdk = Math.max(flutter.minSdkVersion, 26)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -50,6 +50,10 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders["appTitle"] = "Subspace Relay (Debug)"
         }
     }
 }

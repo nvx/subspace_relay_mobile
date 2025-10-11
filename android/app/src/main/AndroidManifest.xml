@@ -7,7 +7,7 @@
     <uses-feature android:name="android.hardware.nfc.hce" android:required="true" />
 
     <application
-        android:label="Subspace Relay"
+        android:label="${appTitle}"
         android:name="${applicationName}"
         android:icon="@mipmap/sr_launcher">
         <service
