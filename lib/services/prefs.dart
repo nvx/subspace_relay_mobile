@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 part 'prefs.g.dart';
 
 const kPrefsBroker = 'broker';
+const kPrefsDiscoveryPubKey = 'discovery_pubkey';
 const kPrefsRelayId = 'relay_id';
 
 @riverpod

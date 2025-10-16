@@ -1,13 +1,16 @@
+import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:vibration/vibration.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
 
+import 'package:subspace_relay_mobile/util.dart';
+import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/hce.dart';
+import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 
 void main() {
@@ -35,21 +38,28 @@ class MyApp extends StatelessWidget {
 }
 
 class ConnectScreen extends HookConsumerWidget {
+  static const _pubKeyHexLength = 64;
   const ConnectScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final relayId = ref.watch(relayIdProvider).value?.relayId;
     final brokerUrl = ref.watch(brokerUrlProvider);
+    final discoveryPublicKey = ref.watch(discoveryPublicKeyProvider);
     final brokerUrlTextController = useTextEditingController();
+    final discoveryPublicKeyTextController = useTextEditingController();
     final initialValueLoaded = useState(false);
     final isEmpty = useState(true);
     final isValid = useState(false);
+    final isDiscoveryPublicKeyValid = useState(true);
 
-    if (!initialValueLoaded.value && brokerUrl.hasValue) {
+    if (!initialValueLoaded.value && brokerUrl.hasValue && discoveryPublicKey.hasValue) {
       initialValueLoaded.value = true;
       if (brokerUrlTextController.text.isEmpty) {
         brokerUrlTextController.text = brokerUrl.value.toString();
+      }
+      if (discoveryPublicKeyTextController.text.isEmpty) {
+        discoveryPublicKeyTextController.text = hex.encode(discoveryPublicKey.value!).toUpperCase();
       }
     }
 
@@ -69,7 +79,12 @@ class ConnectScreen extends HookConsumerWidget {
       isValid.value = (parsedUri.scheme == 'mqtt' || parsedUri.scheme == 'mqtts') && parsedUri.host.isNotEmpty;
     });
 
+    discoveryPublicKeyTextController.addListener(() {
+      isDiscoveryPublicKeyValid.value = discoveryPublicKeyTextController.text.isEmpty || discoveryPublicKeyTextController.text.length == _pubKeyHexLength;
+    });
+
     connect() async {
+      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(discoveryPublicKeyTextController.text));
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text);
       if (context.mounted) {
         Navigator.push(context, MaterialPageRoute(builder: (context) => HceRelayScreen()));
@@ -80,15 +95,23 @@ class ConnectScreen extends HookConsumerWidget {
       appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text('Subspace Relay')),
       body: Center(
         child: Column(
+          spacing: 10,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (relayId != null) Text('RelayID: $relayId'),
             if (relayId != null)
               ElevatedButton(
-                child: Text('Copy'),
+                child: Text('Copy RelayID'),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: relayId));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Copied to Clipboard')));
+                },
+              ),
+            if (relayId != null)
+              ElevatedButton(
+                child: Text('New RelayID'),
+                onPressed: () {
+                  ref.invalidate(relayIdProvider);
                 },
               ),
             SizedBox(
@@ -110,7 +133,26 @@ class ConnectScreen extends HookConsumerWidget {
                 ),
               ),
             ),
-            ElevatedButton(onPressed: !isValid.value || isEmpty.value ? null : connect, child: const Text("Connect")),
+            SizedBox(
+              width: 400,
+              child: TextField(
+                autocorrect: false,
+                textCapitalization: TextCapitalization.none,
+                controller: discoveryPublicKeyTextController,
+                inputFormatters: <TextInputFormatter>[
+                  UpperCaseTextFormatter(),
+                  // only allow hex characters
+                  FilteringTextInputFormatter.allow(RegExp("[A-F0-9]")),
+                  LengthLimitingTextInputFormatter(_pubKeyHexLength),
+                ],
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Discovery Public Key (Optional)',
+                  errorText: isDiscoveryPublicKeyValid.value ? null : 'Invalid public key',
+                ),
+              ),
+            ),
+            ElevatedButton(onPressed: !isValid.value || isEmpty.value || !isDiscoveryPublicKeyValid.value ? null : connect, child: const Text("Start HCE")),
           ],
         ),
       ),

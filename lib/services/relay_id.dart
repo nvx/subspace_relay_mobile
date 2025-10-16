@@ -24,7 +24,7 @@ Future<RelayId> relayId(Ref ref) async {
     relayId = await prefs.getString(kPrefsRelayId);
   }
 
-  if (relayId == null) {
+  if (relayId == null || relayId.isEmpty) {
     relayId = Uuid().v7().replaceAll('-', '');
     await prefs.setString(kPrefsRelayId, relayId);
   }

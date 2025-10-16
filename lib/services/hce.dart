@@ -8,7 +8,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:subspace_relay_pb/subspace_relay_pb.dart' as $pb;
 
 import 'package:subspace_relay_mobile/services/apdu.dart';
+import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
+import 'package:subspace_relay_mobile/services/relay_id.dart';
 import 'package:subspace_relay_mobile/services/shortcut.dart';
 
 part 'hce.g.dart';
@@ -94,6 +96,16 @@ class HceRelay extends _$HceRelay {
       return HceState.invalid;
     }
 
+    final relayInfo = $pb.RelayInfo(
+      connectionType: $pb.ConnectionType.CONNECTION_TYPE_NFC,
+      supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_CARD],
+      supportsShortcut: true,
+      requiresAidList: true,
+    );
+
+    final relayDiscovery = $pb.RelayDiscovery(relayId: (await ref.read(relayIdProvider.future)).relayId, relayInfo: relayInfo);
+    final discoveryPubKey = await ref.read(discoveryPublicKeyProvider.future);
+
     final ephemeralShortcuts = <Shortcut>[];
     final persistentShortcuts = <Shortcut>[];
     final lastShortcutStack = <Shortcut>[];
@@ -106,15 +118,22 @@ class HceRelay extends _$HceRelay {
       }
 
       switch (msg.message.whichMessage()) {
+        case $pb.Message_Message.requestRelayDiscovery:
+          final req = msg.message.requestRelayDiscovery;
+          if (req.controllerPublicKey.length != 32 ||
+              (req.payloadType != $pb.PayloadType.PAYLOAD_TYPE_UNSPECIFIED && !relayInfo.supportedPayloadTypes.contains(req.payloadType)) ||
+              !listEquals(discoveryPubKey, req.controllerPublicKey)) {
+            break;
+          }
+
+          if (kDebugMode) {
+            print('Sending RelayDiscovery reply');
+          }
+
+          final reply = await buildEncryptedRelayDiscovery(discoveryPubKey, relayDiscovery);
+          await ref.read(mqttProvider.notifier).sendReply(reply, msg.rpcResponseMetadata, broadcast: true);
         case $pb.Message_Message.requestRelayInfo:
-          final reply = $pb.Message(
-            relayInfo: $pb.RelayInfo(
-              connectionType: $pb.ConnectionType.CONNECTION_TYPE_NFC,
-              supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_CARD],
-              supportsShortcut: true,
-              requiresAidList: true,
-            ),
-          );
+          final reply = $pb.Message(relayInfo: relayInfo);
           if (kDebugMode) {
             print('Sending RelayInfo reply');
           }
@@ -312,6 +331,11 @@ class HceRelay extends _$HceRelay {
     });
 
     ref.onDispose(hceStreamSubscription.cancel);
+
+    if (discoveryPubKey.isNotEmpty) {
+      final reply = await buildEncryptedRelayDiscovery(discoveryPubKey, relayDiscovery);
+      await ref.read(mqttProvider.notifier).sendReply(reply, null, broadcast: true);
+    }
 
     return HceState.idle;
   }

@@ -33,6 +33,7 @@ class BrokerUrl extends _$BrokerUrl {
     try {
       return Uri.parse(prefsBroker);
     } on FormatException {
+      prefs.remove(kPrefsBroker);
       return _defaultBrokerUrl;
     }
   }
@@ -62,12 +63,16 @@ sealed class RpcResponseMetadata with _$RpcResponseMetadata {
 class Mqtt extends _$Mqtt {
   static final _random = Random.secure();
   static const _contentTypeProto = 'application/proto';
+  static const _topicBroadcastToRelay = 'subspace/broadcast/to-relay';
+  static const _topicBroadcastFromRelay = 'subspace/broadcast/from-relay';
   final _pendingRpc = <String, Completer<$pb.Message>>{};
   late StreamController<RelayMessage> _stream;
   late RelayId _relayId;
   late CipherWand _crypto;
   late String _publishTopic;
   late String _subscribeTopic;
+  late String _publishBroadcastTopic;
+  late String _subscribeBroadcastTopic;
   late MqttServerClient _client;
 
   @override
@@ -84,6 +89,8 @@ class Mqtt extends _$Mqtt {
 
     _publishTopic = 'subspace/endpoint/${_relayId.mqttClientId}/from-relay';
     _subscribeTopic = 'subspace/endpoint/${_relayId.mqttClientId}/to-relay';
+    _publishBroadcastTopic = _topicBroadcastFromRelay;
+    _subscribeBroadcastTopic = _topicBroadcastToRelay;
 
     _crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(_relayId.cryptoKey);
 
@@ -94,10 +101,33 @@ class Mqtt extends _$Mqtt {
       _client.port = brokerUrl.port;
     }
 
+    if (brokerUrl.queryParameters['trust_server_cert'] == 'true') {
+      _client.onBadCertificate = (_) {
+        return true;
+      };
+    }
+
     _client.secure = brokerUrl.scheme == "mqtts";
     _client.keepAlivePeriod = 15;
     _client.autoReconnect = true;
     _client.resubscribeOnAutoReconnect = true;
+    if (kDebugMode) {
+      _client.onAutoReconnect = () {
+        print('onAutoReconnect');
+      };
+      _client.onAutoReconnected = () {
+        print('onAutoReconnected');
+      };
+      _client.onConnected = () {
+        print('onConnected');
+      };
+      _client.onDisconnected = () {
+        print('onDisconnected');
+      };
+      _client.onFailedConnectionAttempt = (int attemptNumber) {
+        print('onFailedConnectionAttempt($attemptNumber)');
+      };
+    }
 
     var connectionMessage = MqttConnectMessage().withClientIdentifier(_relayId.mqttClientId).keepAliveFor(MqttConstants.defaultKeepAlive).startClean();
 
@@ -115,8 +145,9 @@ class Mqtt extends _$Mqtt {
     await _client.connect();
 
     _client.subscribe(_subscribeTopic, MqttQos.exactlyOnce);
+    _client.subscribe(_subscribeBroadcastTopic, MqttQos.exactlyOnce);
 
-    final subscription = _client.updates.listen(onData);
+    final subscription = _client.updates.listen(_onData);
     ref.onDispose(subscription.cancel);
 
     if (kDebugMode) {
@@ -130,36 +161,39 @@ class Mqtt extends _$Mqtt {
     await sendUnsolicited($pb.Message(log: $pb.Log(message: message)));
   }
 
-  Future<void> sendUnsolicited($pb.Message msg) async {
-    await _send(msg);
+  Future<void> sendUnsolicited($pb.Message msg, {bool broadcast = false}) async {
+    await _send(msg, broadcast: broadcast);
   }
 
-  Future<void> sendReply($pb.Message msg, RpcResponseMetadata? rpcResponseMetadata) async {
-    await _send(msg, topic: rpcResponseMetadata?.responseTopic, correlationData: rpcResponseMetadata?.correlationData);
+  Future<void> sendReply($pb.Message msg, RpcResponseMetadata? rpcResponseMetadata, {bool broadcast = false}) async {
+    await _send(msg, topic: rpcResponseMetadata?.responseTopic, correlationData: rpcResponseMetadata?.correlationData, broadcast: broadcast);
   }
 
-  Future<$pb.Message> rpc($pb.Message msg) async {
+  Future<$pb.Message> rpc($pb.Message msg, {bool broadcast = false}) async {
     final correlationData = Uint8Buffer();
     correlationData.addAll(List<int>.generate(16, (i) => _random.nextInt(256)));
 
     final completer = Completer<$pb.Message>();
     _pendingRpc[hex.encode(correlationData)] = completer;
 
-    await _send(msg, correlationData: correlationData, rpcRequest: true);
+    await _send(msg, correlationData: correlationData, rpcRequest: true, broadcast: broadcast);
 
     return completer.future;
   }
 
-  Future<void> _send($pb.Message msg, {String? topic, Uint8Buffer? correlationData, bool rpcRequest = false}) async {
+  Future<void> _send($pb.Message msg, {String? topic, Uint8Buffer? correlationData, bool rpcRequest = false, bool broadcast = false}) async {
     final pbMessage = msg.writeToBuffer();
 
-    final encryptedPayload = await _crypto.encrypt(pbMessage);
-
     Uint8Buffer messageBuffer = Uint8Buffer();
-    messageBuffer.addAll(encryptedPayload.concatenation());
+    if (broadcast) {
+      messageBuffer.addAll(pbMessage);
+    } else {
+      final encryptedPayload = await _crypto.encrypt(pbMessage);
+      messageBuffer.addAll(encryptedPayload.concatenation());
+    }
 
     var publishMsg = MqttPublishMessage()
-        .toTopic(topic ?? _publishTopic)
+        .toTopic(topic ?? (broadcast ? _publishBroadcastTopic : _publishTopic))
         .withQos(MqttQos.exactlyOnce)
         .withContentType(_contentTypeProto)
         .publishData(messageBuffer);
@@ -167,7 +201,7 @@ class Mqtt extends _$Mqtt {
       publishMsg = publishMsg.withResponseCorrelationdata(correlationData);
     }
     if (rpcRequest) {
-      publishMsg = publishMsg.withResponseTopic(_subscribeTopic);
+      publishMsg = publishMsg.withResponseTopic(broadcast ? _subscribeBroadcastTopic : _subscribeTopic);
     }
 
     if (!ref.mounted) {
@@ -181,7 +215,7 @@ class Mqtt extends _$Mqtt {
     _client.publishUserMessage(publishMsg);
   }
 
-  void onData(List<MqttReceivedMessage<MqttMessage>> c) async {
+  void _onData(List<MqttReceivedMessage<MqttMessage>> c) async {
     if (!ref.mounted) {
       return;
     }
@@ -199,14 +233,27 @@ class Mqtt extends _$Mqtt {
       return;
     }
 
-    final decryptedPayload = await _crypto.decrypt(
-      SecretBox.fromConcatenation(encryptedPayload, nonceLength: AesGcm.defaultNonceLength, macLength: AesGcm.aesGcmMac.macLength),
-    );
+    List<int> decryptedPayload;
+    final isBroadcast = c[0].topic == _subscribeBroadcastTopic;
+    if (isBroadcast) {
+      decryptedPayload = encryptedPayload;
+    } else {
+      decryptedPayload = await _crypto.decrypt(
+        SecretBox.fromConcatenation(encryptedPayload, nonceLength: AesGcm.defaultNonceLength, macLength: AesGcm.aesGcmMac.macLength),
+      );
+    }
 
     final pbMessage = $pb.Message.fromBuffer(decryptedPayload);
 
     if (kDebugMode) {
       print(pbMessage);
+    }
+
+    if (isBroadcast && (!pbMessage.hasRequestRelayDiscovery() && !pbMessage.hasRelayDiscoveryEncrypted() && !pbMessage.hasRelayDiscoveryPlaintext())) {
+      if (kDebugMode) {
+        print('Ignoring unexpected broadcast message type');
+      }
+      return;
     }
 
     final correlationData = msg.variableHeader?.correlationData;

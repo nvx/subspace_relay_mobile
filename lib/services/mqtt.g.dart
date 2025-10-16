@@ -32,7 +32,7 @@ final class BrokerUrlProvider extends $AsyncNotifierProvider<BrokerUrl, Uri> {
   BrokerUrl create() => BrokerUrl();
 }
 
-String _$brokerUrlHash() => r'd06cf1f90eeb912c5242b8199bdf3020b23f92d4';
+String _$brokerUrlHash() => r'08ce380c4e069894e6bf1e7aabf5817f44b799e1';
 
 abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
   FutureOr<Uri> build();
@@ -77,7 +77,7 @@ final class MqttProvider
   Mqtt create() => Mqtt();
 }
 
-String _$mqttHash() => r'a8fbaa306844afdd0d8f2b8a0aa5c0f5a8f7e377';
+String _$mqttHash() => r'bb86cf1859ebe5a64cd391dd4f574d4f4749034e';
 
 abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
   FutureOr<Stream<RelayMessage>> build();
