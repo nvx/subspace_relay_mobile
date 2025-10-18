@@ -67,7 +67,6 @@ class Mqtt extends _$Mqtt {
   static const _topicBroadcastFromRelay = 'subspace/broadcast/from-relay';
   final _pendingRpc = <String, Completer<$pb.Message>>{};
   late StreamController<RelayMessage> _stream;
-  late RelayId _relayId;
   late CipherWand _crypto;
   late String _publishTopic;
   late String _subscribeTopic;
@@ -76,27 +75,24 @@ class Mqtt extends _$Mqtt {
   late MqttServerClient _client;
 
   @override
-  Future<Stream<RelayMessage>> build() async {
+  Future<Stream<RelayMessage>> build(RelayId relayId) async {
     _pendingRpc.forEach((_, completer) {
       completer.completeError(Exception('connection lost'));
     });
     _pendingRpc.clear();
 
-    _stream = StreamController<RelayMessage>();
-    ref.onDispose(_stream.close);
+    _stream = StreamController<RelayMessage>.broadcast();
 
-    _relayId = await ref.watch(relayIdProvider.future);
-
-    _publishTopic = 'subspace/endpoint/${_relayId.mqttClientId}/from-relay';
-    _subscribeTopic = 'subspace/endpoint/${_relayId.mqttClientId}/to-relay';
+    _publishTopic = 'subspace/endpoint/${relayId.mqttClientId}/from-relay';
+    _subscribeTopic = 'subspace/endpoint/${relayId.mqttClientId}/to-relay';
     _publishBroadcastTopic = _topicBroadcastFromRelay;
     _subscribeBroadcastTopic = _topicBroadcastToRelay;
 
-    _crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(_relayId.cryptoKey);
+    _crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(relayId.cryptoKey);
 
     final brokerUrl = await ref.watch(brokerUrlProvider.future);
 
-    _client = MqttServerClient(brokerUrl.host, _relayId.mqttClientId, maxConnectionAttempts: 99999999);
+    _client = MqttServerClient(brokerUrl.host, relayId.mqttClientId, maxConnectionAttempts: 99999999);
     if (brokerUrl.hasPort) {
       _client.port = brokerUrl.port;
     }
@@ -129,7 +125,7 @@ class Mqtt extends _$Mqtt {
       };
     }
 
-    var connectionMessage = MqttConnectMessage().withClientIdentifier(_relayId.mqttClientId).keepAliveFor(MqttConstants.defaultKeepAlive).startClean();
+    var connectionMessage = MqttConnectMessage().withClientIdentifier(relayId.mqttClientId).keepAliveFor(MqttConstants.defaultKeepAlive).startClean();
 
     if (brokerUrl.userInfo.isNotEmpty) {
       final parts = brokerUrl.userInfo.split(':');
@@ -140,7 +136,15 @@ class Mqtt extends _$Mqtt {
 
     _client.connectionMessage = connectionMessage;
 
-    ref.onDispose(_client.disconnect);
+    ref.onDispose(() async {
+      if (_client.connectionStatus?.state == MqttConnectionState.connected) {
+        if (kDebugMode) {
+          print('Sending disconnect');
+        }
+        await sendReply($pb.Message(disconnect: $pb.Empty.create()), null);
+      }
+      _client.disconnect();
+    });
 
     await _client.connect();
 
@@ -151,8 +155,10 @@ class Mqtt extends _$Mqtt {
     ref.onDispose(subscription.cancel);
 
     if (kDebugMode) {
-      print('relay_id: ${_relayId.relayId}');
+      print('relay_id: ${relayId.relayId}');
     }
+
+    ref.onDispose(_stream.close);
 
     return _stream.stream;
   }
@@ -202,10 +208,6 @@ class Mqtt extends _$Mqtt {
     }
     if (rpcRequest) {
       publishMsg = publishMsg.withResponseTopic(broadcast ? _subscribeBroadcastTopic : _subscribeTopic);
-    }
-
-    if (!ref.mounted) {
-      throw 'attempt to publish when disposed';
     }
 
     if (_client.published == null) {
@@ -274,6 +276,9 @@ class Mqtt extends _$Mqtt {
       }
       rpcResponseMetadata = RpcResponseMetadata(responseTopic: responseTopic, correlationData: correlationData);
     }
-    _stream.add(RelayMessage(message: pbMessage, rpcResponseMetadata: rpcResponseMetadata));
+
+    if (!_stream.isClosed) {
+      _stream.add(RelayMessage(message: pbMessage, rpcResponseMetadata: rpcResponseMetadata));
+    }
   }
 }

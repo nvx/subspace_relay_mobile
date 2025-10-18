@@ -54,37 +54,82 @@ abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
 }
 
 @ProviderFor(Mqtt)
-const mqttProvider = MqttProvider._();
+const mqttProvider = MqttFamily._();
 
 final class MqttProvider
     extends $AsyncNotifierProvider<Mqtt, Stream<RelayMessage>> {
-  const MqttProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'mqttProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  const MqttProvider._({
+    required MqttFamily super.from,
+    required RelayId super.argument,
+  }) : super(
+         retry: null,
+         name: r'mqttProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$mqttHash();
 
+  @override
+  String toString() {
+    return r'mqttProvider'
+        ''
+        '($argument)';
+  }
+
   @$internal
   @override
   Mqtt create() => Mqtt();
+
+  @override
+  bool operator ==(Object other) {
+    return other is MqttProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$mqttHash() => r'bb86cf1859ebe5a64cd391dd4f574d4f4749034e';
+String _$mqttHash() => r'c21083919d29794c8126c271893a832bd64612b0';
+
+final class MqttFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          Mqtt,
+          AsyncValue<Stream<RelayMessage>>,
+          Stream<RelayMessage>,
+          FutureOr<Stream<RelayMessage>>,
+          RelayId
+        > {
+  const MqttFamily._()
+    : super(
+        retry: null,
+        name: r'mqttProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  MqttProvider call(RelayId relayId) =>
+      MqttProvider._(argument: relayId, from: this);
+
+  @override
+  String toString() => r'mqttProvider';
+}
 
 abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
-  FutureOr<Stream<RelayMessage>> build();
+  late final _$args = ref.$arg as RelayId;
+  RelayId get relayId => _$args;
+
+  FutureOr<Stream<RelayMessage>> build(RelayId relayId);
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
+    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<AsyncValue<Stream<RelayMessage>>, Stream<RelayMessage>>;

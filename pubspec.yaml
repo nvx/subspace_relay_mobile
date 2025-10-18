@@ -16,20 +16,23 @@ dependencies:
   hooks_riverpod: ^3.0.0
   flutter_hooks: ^0.21.2
   riverpod_annotation: ^3.0.0
-  shared_preferences: ^2.5.3
-  cryptography_plus: ^2.7.1
-  cryptography_flutter_plus: ^2.3.4
   freezed_annotation: ^3.1.0
+  shared_preferences: ^2.5.3
+  package_info_plus: ^9.0.0
 
+  subspace_relay_pb: ^1.0.6
   protobuf: ^5.0.0
   mqtt5_client: ^4.14.0
   uuid: ^4.5.1
+  cryptography_plus: ^2.7.1
+  cryptography_flutter_plus: ^2.3.4
+  nfc_manager: ^4.1.1
 
-  subspace_relay_pb: ^1.0.3
   convert: ^3.1.2
   typed_data: ^1.4.0
   collection: ^1.19.1
   vibration: ^3.1.4
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

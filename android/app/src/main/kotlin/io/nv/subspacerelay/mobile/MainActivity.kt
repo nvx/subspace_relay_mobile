@@ -1,5 +1,6 @@
 package io.nv.subspacerelay.mobile
 
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
@@ -61,11 +62,15 @@ class MainActivity : FlutterActivity() {
     override fun onResume() {
         super.onResume()
         cardEmulation?.setPreferredService(this, ComponentName(this, ApduService::class.java));
+        val intent = Intent(context, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_MUTABLE)
+        NfcAdapter.getDefaultAdapter(context)?.enableForegroundDispatch(this, pendingIntent, null, null)
     }
 
     override fun onPause() {
         super.onPause()
         cardEmulation?.unsetPreferredService(this)
+        NfcAdapter.getDefaultAdapter(context)?.disableForegroundDispatch(this)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

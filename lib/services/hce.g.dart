@@ -85,7 +85,7 @@ final class HceProvider
   Hce create() => Hce();
 }
 
-String _$hceHash() => r'020f959d3d69b54dc6c6929a5466f7262e99da9e';
+String _$hceHash() => r'c5bec65cff37e458d675e1f61959fd85d83b9bda';
 
 abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
   FutureOr<Stream<Uint8List?>> build();
@@ -111,7 +111,7 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
 const hceRelayProvider = HceRelayProvider._();
 
 final class HceRelayProvider
-    extends $AsyncNotifierProvider<HceRelay, HceState> {
+    extends $AsyncNotifierProvider<HceRelay, HceRelayState> {
   const HceRelayProvider._()
     : super(
         from: null,
@@ -131,20 +131,20 @@ final class HceRelayProvider
   HceRelay create() => HceRelay();
 }
 
-String _$hceRelayHash() => r'2893c06997b9093f9acb3c5d0df5c5ec48087302';
+String _$hceRelayHash() => r'1d386fe0605ce86f429f3a99a4aa7b816189707b';
 
-abstract class _$HceRelay extends $AsyncNotifier<HceState> {
-  FutureOr<HceState> build();
+abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
+  FutureOr<HceRelayState> build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<AsyncValue<HceState>, HceState>;
+    final ref = this.ref as $Ref<AsyncValue<HceRelayState>, HceRelayState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<HceState>, HceState>,
-              AsyncValue<HceState>,
+              AnyNotifier<AsyncValue<HceRelayState>, HceRelayState>,
+              AsyncValue<HceRelayState>,
               Object?,
               Object?
             >;

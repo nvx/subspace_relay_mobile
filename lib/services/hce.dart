@@ -9,9 +9,11 @@ import 'package:subspace_relay_pb/subspace_relay_pb.dart' as $pb;
 
 import 'package:subspace_relay_mobile/services/apdu.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
+import 'package:subspace_relay_mobile/services/log.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 import 'package:subspace_relay_mobile/services/shortcut.dart';
+import 'package:subspace_relay_mobile/services/version.dart';
 
 part 'hce.g.dart';
 
@@ -37,7 +39,7 @@ class Hce extends _$Hce {
   Future<Stream<Uint8List?>> build() async {
     ref.onDispose(removeAidsForService);
 
-    final stream = StreamController<Uint8List?>();
+    final stream = StreamController<Uint8List?>.broadcast();
     ref.onDispose(stream.close);
 
     final subscription = eventSource.receiveBroadcastStream().listen((msg) {
@@ -78,22 +80,24 @@ class Hce extends _$Hce {
   }
 }
 
-enum HceState { invalid, idle, connected }
+enum HceRelayState { invalid, idle, connected }
 
 @riverpod
 class HceRelay extends _$HceRelay {
   @override
-  Future<HceState> build() async {
+  Future<HceRelayState> build() async {
     int sequence = 0;
 
-    final mqttStream = await ref.watch(mqttProvider.future);
+    final relayId = await ref.read(relayIdProvider.future);
+
+    final mqttStream = await ref.watch(mqttProvider(relayId).future);
     if (!ref.mounted) {
-      return HceState.invalid;
+      return HceRelayState.invalid;
     }
 
     final hceStream = await ref.watch(hceProvider.future);
     if (!ref.mounted) {
-      return HceState.invalid;
+      return HceRelayState.invalid;
     }
 
     final relayInfo = $pb.RelayInfo(
@@ -101,9 +105,10 @@ class HceRelay extends _$HceRelay {
       supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_CARD],
       supportsShortcut: true,
       requiresAidList: true,
+      userAgent: '$appName/${await ref.watch(appVersionProvider.future)}',
     );
 
-    final relayDiscovery = $pb.RelayDiscovery(relayId: (await ref.read(relayIdProvider.future)).relayId, relayInfo: relayInfo);
+    final relayDiscovery = $pb.RelayDiscovery(relayId: relayId.relayId, relayInfo: relayInfo);
     final discoveryPubKey = await ref.read(discoveryPublicKeyProvider.future);
 
     final ephemeralShortcuts = <Shortcut>[];
@@ -131,23 +136,24 @@ class HceRelay extends _$HceRelay {
           }
 
           final reply = await buildEncryptedRelayDiscovery(discoveryPubKey, relayDiscovery);
-          await ref.read(mqttProvider.notifier).sendReply(reply, msg.rpcResponseMetadata, broadcast: true);
+          await ref.read(mqttProvider(relayId).notifier).sendReply(reply, msg.rpcResponseMetadata, broadcast: true);
         case $pb.Message_Message.requestRelayInfo:
           final reply = $pb.Message(relayInfo: relayInfo);
           if (kDebugMode) {
             print('Sending RelayInfo reply');
           }
-          await ref.read(mqttProvider.notifier).sendReply(reply, msg.rpcResponseMetadata);
+          await ref.read(mqttProvider(relayId).notifier).sendReply(reply, msg.rpcResponseMetadata);
         case $pb.Message_Message.log:
           if (kDebugMode) {
             print('Log from controlller: ${msg.message.log.message}');
           }
+          ref.read(remoteLogProvider.notifier).log(msg.message.log.message);
         case $pb.Message_Message.reconnect:
           if (kDebugMode) {
             print('Reconnect');
           }
 
-          state = AsyncValue.data(HceState.connected);
+          state = AsyncValue.data(HceRelayState.connected);
 
           if (msg.message.reconnect.forceFlushShortcuts) {
             ephemeralShortcuts.clear();
@@ -187,7 +193,7 @@ class HceRelay extends _$HceRelay {
             print('Disconnect');
           }
 
-          state = AsyncValue.data(HceState.idle);
+          state = AsyncValue.data(HceRelayState.idle);
 
           await ref.read(hceProvider.notifier).removeAidsForService();
           ephemeralShortcuts.removeWhere((e) => !e.persistReconnect);
@@ -202,7 +208,9 @@ class HceRelay extends _$HceRelay {
             sortShortcuts(ephemeralShortcuts);
           }
         default:
-          throw 'Unexpected payload type';
+          if (kDebugMode) {
+            print('Unexpected payload type');
+          }
       }
     });
     ref.onDispose(mqttStreamSubscription.cancel);
@@ -236,7 +244,7 @@ class HceRelay extends _$HceRelay {
           sequence++;
 
           // deliberately not awaited
-          ref.read(mqttProvider.notifier).sendReply($pb.Message(payload: payload), shortcut.rpcResponseMetadata);
+          ref.read(mqttProvider(relayId).notifier).sendReply($pb.Message(payload: payload), shortcut.rpcResponseMetadata);
         }
 
         await ref.read(hceProvider.notifier).sendResponseApdu(shortcut.rapdu);
@@ -310,7 +318,7 @@ class HceRelay extends _$HceRelay {
       final payload = $pb.Payload(payload: capdu, payloadType: $pb.PayloadType.PAYLOAD_TYPE_PCSC_CARD, sequence: sequence);
       sequence++;
 
-      final rpcFuture = CancelableOperation<$pb.Message>.fromFuture(ref.read(mqttProvider.notifier).rpc($pb.Message(payload: payload)));
+      final rpcFuture = CancelableOperation<$pb.Message>.fromFuture(ref.read(mqttProvider(relayId).notifier).rpc($pb.Message(payload: payload)));
       cancelPendingHce = rpcFuture.cancel;
       final res = await rpcFuture.valueOrCancellation(null);
 
@@ -329,14 +337,13 @@ class HceRelay extends _$HceRelay {
 
       ref.read(hceProvider.notifier).sendResponseApdu(Uint8List.fromList(res.payload.payload));
     });
-
     ref.onDispose(hceStreamSubscription.cancel);
 
     if (discoveryPubKey.isNotEmpty) {
       final reply = await buildEncryptedRelayDiscovery(discoveryPubKey, relayDiscovery);
-      await ref.read(mqttProvider.notifier).sendReply(reply, null, broadcast: true);
+      await ref.read(mqttProvider(relayId).notifier).sendReply(reply, null, broadcast: true);
     }
 
-    return HceState.idle;
+    return HceRelayState.idle;
   }
 }
