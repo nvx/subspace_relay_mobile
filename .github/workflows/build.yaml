@@ -55,7 +55,7 @@ jobs:
           fi
 
       - name: Cache Android NDK
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /usr/local/lib/android/sdk/ndk
           key: ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android\app\build.gradle.kts') }}
@@ -64,7 +64,7 @@ jobs:
             ndk-cache-
 
       - name: Cache Android cmake
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /usr/local/lib/android/sdk/cmake
           key: cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android\app\build.gradle.kts') }}
