@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/local/lib/android/sdk/ndk
-          key: ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android\app\build.gradle.kts') }}
+          key: ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android/app/build.gradle.kts') }}
           restore-keys: |
             ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-
             ndk-cache-
@@ -67,7 +67,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/local/lib/android/sdk/cmake
-          key: cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android\app\build.gradle.kts') }}
+          key: cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android/app/build.gradle.kts') }}
           restore-keys: |
             cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-
             cmake-cache-
@@ -101,6 +101,7 @@ jobs:
         with:
           service_account: '${{ vars.GCP_SERVICE_ACCOUNT }}'
           workload_identity_provider: '${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+          request_reason: ${{ github.workflow_ref }}
 
       - name: Upload to Google Play
         if: ${{ github.ref_name == 'main' }}
