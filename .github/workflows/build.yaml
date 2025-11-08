@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  FLUTTER_CHANNEL: "stable"
+
+jobs:
+  build_android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Android signing key
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}" | base64 --decode > android/key.jks
+          cat <<EOF > android/key.properties
+          storePassword=${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          keyAlias=subspacerelay-play-upload
+          storeFile=../key.jks
+          EOF
+
+      - name: Build
+        run: |
+          flutter build appbundle --release --build-number="${{ github.run_number }}" --build-name="1.0.${{ github.run_number }}"
+          flutter build apk --debug --build-number="${{ github.run_number }}" --build-name="1.0.${{ github.run_number }}"
+
+      - name: Archive App Bundle
+        uses: actions/upload-artifact@v5
+        with:
+          name: "subspace_relay_mobile_aab_release_v${{ github.run_number }}"
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: "subspace_relay_mobile_apk_debug_v${{ github.run_number }}"
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        id: auth
+        with:
+          service_account: '${{ env.GCP_SERVICE_ACCOUNT }}'
+          workload_identity_provider: '${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+
+      - uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          packageName: io.nv.subspacerelay.mobile
+          releaseName: "1.0.${{ github.run_number }}"
+          track: internal
+          status: draft

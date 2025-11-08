@@ -20,7 +20,7 @@ part 'reader.freezed.dart';
 @riverpod
 class Reader extends _$Reader {
   @override
-  Future<IsoDepAndroid?> build() async {
+  Future<NfcTag?> build() async {
     NfcAvailability availability = await NfcManager.instance.checkAvailability();
     switch (availability) {
       case NfcAvailability.unsupported:
@@ -34,8 +34,7 @@ class Reader extends _$Reader {
     NfcManager.instance.startSession(
       pollingOptions: {NfcPollingOption.iso14443},
       onDiscovered: (NfcTag tag) async {
-        final isoTag = IsoDepAndroid.from(tag);
-        state = AsyncValue.data(isoTag);
+        state = AsyncValue.data(tag);
       },
     );
 
@@ -53,7 +52,7 @@ class Reader extends _$Reader {
 
 @freezed
 sealed class ReaderRelayState with _$ReaderRelayState {
-  const factory ReaderRelayState({required RelayId relayId, required IsoDepAndroid tag}) = _ReaderRelayState;
+  const factory ReaderRelayState({required RelayId relayId, required $pb.RelayInfo relayInfo}) = _ReaderRelayState;
 }
 
 @riverpod
@@ -67,15 +66,27 @@ class ReaderRelay extends _$ReaderRelay {
       return null;
     }
 
+    final nfcA = NfcAAndroid.from(reader);
+    final isoTag = IsoDepAndroid.from(reader);
+
+    if (isoTag == null) {
+      return null;
+    }
+
+    final transceive = isoTag.transceive;
+
     var relayId = await ref.read(relayIdProvider.future);
     if (dynamicRelayId) {
-      relayId = await RelayId.fromString('${relayId.relayId}-${hex.encode(reader.tag.id)}');
+      relayId = await RelayId.fromString('${relayId.relayId}-${hex.encode(isoTag.tag.id)}');
     }
 
     final relayInfo = $pb.RelayInfo(
       connectionType: $pb.ConnectionType.CONNECTION_TYPE_NFC,
       supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_READER],
       userAgent: '$appName/${await ref.watch(appVersionProvider.future)}',
+      uid: isoTag.tag.id,
+      atqa: nfcA?.atqa,
+      sak: nfcA == null ? null : [nfcA.sak],
     );
 
     final relayDiscovery = $pb.RelayDiscovery(relayId: relayId.relayId, relayInfo: relayInfo);
@@ -146,7 +157,7 @@ class ReaderRelay extends _$ReaderRelay {
 
           Uint8List rapdu;
           try {
-            rapdu = await reader.transceive(Uint8List.fromList(msg.message.payload.payload));
+            rapdu = await transceive(Uint8List.fromList(msg.message.payload.payload));
           } catch (error, stackTrace) {
             if (kDebugMode) {
               print('Exception during transceive, card removed? $error\n$stackTrace');
@@ -171,6 +182,6 @@ class ReaderRelay extends _$ReaderRelay {
 
     _initial = false;
 
-    return ReaderRelayState(relayId: relayId, tag: reader);
+    return ReaderRelayState(relayId: relayId, relayInfo: relayInfo);
   }
 }

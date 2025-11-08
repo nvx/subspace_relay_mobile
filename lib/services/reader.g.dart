@@ -12,8 +12,7 @@ part of 'reader.dart';
 @ProviderFor(Reader)
 const readerProvider = ReaderProvider._();
 
-final class ReaderProvider
-    extends $AsyncNotifierProvider<Reader, IsoDepAndroid?> {
+final class ReaderProvider extends $AsyncNotifierProvider<Reader, NfcTag?> {
   const ReaderProvider._()
     : super(
         from: null,
@@ -33,20 +32,20 @@ final class ReaderProvider
   Reader create() => Reader();
 }
 
-String _$readerHash() => r'86228f4f0e8aaef65606d9cfe18f91e21d68aa64';
+String _$readerHash() => r'dab37cec622d3923770325bc09113ac142b91f6b';
 
-abstract class _$Reader extends $AsyncNotifier<IsoDepAndroid?> {
-  FutureOr<IsoDepAndroid?> build();
+abstract class _$Reader extends $AsyncNotifier<NfcTag?> {
+  FutureOr<NfcTag?> build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<AsyncValue<IsoDepAndroid?>, IsoDepAndroid?>;
+    final ref = this.ref as $Ref<AsyncValue<NfcTag?>, NfcTag?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<IsoDepAndroid?>, IsoDepAndroid?>,
-              AsyncValue<IsoDepAndroid?>,
+              AnyNotifier<AsyncValue<NfcTag?>, NfcTag?>,
+              AsyncValue<NfcTag?>,
               Object?,
               Object?
             >;
@@ -95,7 +94,7 @@ final class ReaderRelayProvider
   }
 }
 
-String _$readerRelayHash() => r'd0e2891d9d65cf24240eef64bb68ea7dd90611f3';
+String _$readerRelayHash() => r'864d51bcb32ba9d742e769744318460f3a771c5b';
 
 final class ReaderRelayFamily extends $Family
     with

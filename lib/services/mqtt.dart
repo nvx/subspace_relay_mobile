@@ -95,6 +95,11 @@ class Mqtt extends _$Mqtt {
     _client = MqttServerClient(brokerUrl.host, relayId.mqttClientId, maxConnectionAttempts: 99999999);
     if (brokerUrl.hasPort) {
       _client.port = brokerUrl.port;
+    } else {
+      _client.port = switch (brokerUrl.scheme) {
+        "mqtts" => 8883,
+        _ => 1883,
+      };
     }
 
     if (brokerUrl.queryParameters['trust_server_cert'] == 'true') {
@@ -103,7 +108,14 @@ class Mqtt extends _$Mqtt {
       };
     }
 
-    _client.secure = brokerUrl.scheme == "mqtts";
+    if (brokerUrl.scheme == 'ws' || brokerUrl.scheme == 'wss') {
+      _client.useWebSocket = true;
+      final params = Map<String, dynamic>.from(brokerUrl.queryParametersAll);
+      params.remove('trust_server_cert');
+      _client.server = brokerUrl.replace(queryParameters: params).toString();
+    }
+
+    _client.secure = brokerUrl.scheme == 'mqtts';
     _client.keepAlivePeriod = 15;
     _client.autoReconnect = true;
     _client.resubscribeOnAutoReconnect = true;

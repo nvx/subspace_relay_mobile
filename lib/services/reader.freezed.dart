@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ReaderRelayState implements DiagnosticableTreeMixin {
 
- RelayId get relayId; IsoDepAndroid get tag;
+ RelayId get relayId; $pb.RelayInfo get relayInfo;
 /// Create a copy of ReaderRelayState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,21 +26,21 @@ $ReaderRelayStateCopyWith<ReaderRelayState> get copyWith => _$ReaderRelayStateCo
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'ReaderRelayState'))
-    ..add(DiagnosticsProperty('relayId', relayId))..add(DiagnosticsProperty('tag', tag));
+    ..add(DiagnosticsProperty('relayId', relayId))..add(DiagnosticsProperty('relayInfo', relayInfo));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReaderRelayState&&(identical(other.relayId, relayId) || other.relayId == relayId)&&(identical(other.tag, tag) || other.tag == tag));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReaderRelayState&&(identical(other.relayId, relayId) || other.relayId == relayId)&&(identical(other.relayInfo, relayInfo) || other.relayInfo == relayInfo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,relayId,tag);
+int get hashCode => Object.hash(runtimeType,relayId,relayInfo);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'ReaderRelayState(relayId: $relayId, tag: $tag)';
+  return 'ReaderRelayState(relayId: $relayId, relayInfo: $relayInfo)';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ReaderRelayStateCopyWith<$Res>  {
   factory $ReaderRelayStateCopyWith(ReaderRelayState value, $Res Function(ReaderRelayState) _then) = _$ReaderRelayStateCopyWithImpl;
 @useResult
 $Res call({
- RelayId relayId, IsoDepAndroid tag
+ RelayId relayId, $pb.RelayInfo relayInfo
 });
 
 
@@ -68,11 +68,11 @@ class _$ReaderRelayStateCopyWithImpl<$Res>
 
 /// Create a copy of ReaderRelayState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? relayId = null,Object? tag = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? relayId = null,Object? relayInfo = null,}) {
   return _then(_self.copyWith(
 relayId: null == relayId ? _self.relayId : relayId // ignore: cast_nullable_to_non_nullable
-as RelayId,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as IsoDepAndroid,
+as RelayId,relayInfo: null == relayInfo ? _self.relayInfo : relayInfo // ignore: cast_nullable_to_non_nullable
+as $pb.RelayInfo,
   ));
 }
 /// Create a copy of ReaderRelayState
@@ -163,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RelayId relayId,  IsoDepAndroid tag)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RelayId relayId,  $pb.RelayInfo relayInfo)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReaderRelayState() when $default != null:
-return $default(_that.relayId,_that.tag);case _:
+return $default(_that.relayId,_that.relayInfo);case _:
   return orElse();
 
 }
@@ -184,10 +184,10 @@ return $default(_that.relayId,_that.tag);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RelayId relayId,  IsoDepAndroid tag)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RelayId relayId,  $pb.RelayInfo relayInfo)  $default,) {final _that = this;
 switch (_that) {
 case _ReaderRelayState():
-return $default(_that.relayId,_that.tag);}
+return $default(_that.relayId,_that.relayInfo);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -201,10 +201,10 @@ return $default(_that.relayId,_that.tag);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RelayId relayId,  IsoDepAndroid tag)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RelayId relayId,  $pb.RelayInfo relayInfo)?  $default,) {final _that = this;
 switch (_that) {
 case _ReaderRelayState() when $default != null:
-return $default(_that.relayId,_that.tag);case _:
+return $default(_that.relayId,_that.relayInfo);case _:
   return null;
 
 }
@@ -216,11 +216,11 @@ return $default(_that.relayId,_that.tag);case _:
 
 
 class _ReaderRelayState with DiagnosticableTreeMixin implements ReaderRelayState {
-  const _ReaderRelayState({required this.relayId, required this.tag});
+  const _ReaderRelayState({required this.relayId, required this.relayInfo});
   
 
 @override final  RelayId relayId;
-@override final  IsoDepAndroid tag;
+@override final  $pb.RelayInfo relayInfo;
 
 /// Create a copy of ReaderRelayState
 /// with the given fields replaced by the non-null parameter values.
@@ -233,21 +233,21 @@ _$ReaderRelayStateCopyWith<_ReaderRelayState> get copyWith => __$ReaderRelayStat
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'ReaderRelayState'))
-    ..add(DiagnosticsProperty('relayId', relayId))..add(DiagnosticsProperty('tag', tag));
+    ..add(DiagnosticsProperty('relayId', relayId))..add(DiagnosticsProperty('relayInfo', relayInfo));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReaderRelayState&&(identical(other.relayId, relayId) || other.relayId == relayId)&&(identical(other.tag, tag) || other.tag == tag));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReaderRelayState&&(identical(other.relayId, relayId) || other.relayId == relayId)&&(identical(other.relayInfo, relayInfo) || other.relayInfo == relayInfo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,relayId,tag);
+int get hashCode => Object.hash(runtimeType,relayId,relayInfo);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'ReaderRelayState(relayId: $relayId, tag: $tag)';
+  return 'ReaderRelayState(relayId: $relayId, relayInfo: $relayInfo)';
 }
 
 
@@ -258,7 +258,7 @@ abstract mixin class _$ReaderRelayStateCopyWith<$Res> implements $ReaderRelaySta
   factory _$ReaderRelayStateCopyWith(_ReaderRelayState value, $Res Function(_ReaderRelayState) _then) = __$ReaderRelayStateCopyWithImpl;
 @override @useResult
 $Res call({
- RelayId relayId, IsoDepAndroid tag
+ RelayId relayId, $pb.RelayInfo relayInfo
 });
 
 
@@ -275,11 +275,11 @@ class __$ReaderRelayStateCopyWithImpl<$Res>
 
 /// Create a copy of ReaderRelayState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? relayId = null,Object? tag = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? relayId = null,Object? relayInfo = null,}) {
   return _then(_ReaderRelayState(
 relayId: null == relayId ? _self.relayId : relayId // ignore: cast_nullable_to_non_nullable
-as RelayId,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
-as IsoDepAndroid,
+as RelayId,relayInfo: null == relayInfo ? _self.relayInfo : relayInfo // ignore: cast_nullable_to_non_nullable
+as $pb.RelayInfo,
   ));
 }
 
