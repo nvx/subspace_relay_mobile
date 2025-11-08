@@ -16,7 +16,6 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "io.nv.subspacerelay.mobile"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

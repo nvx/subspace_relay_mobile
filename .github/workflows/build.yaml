@@ -54,24 +54,6 @@ jobs:
             exit 1
           fi
 
-      - name: Cache Android NDK
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/lib/android/sdk/ndk
-          key: ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android/app/build.gradle.kts') }}
-          restore-keys: |
-            ndk-cache-${{ steps.flutter-action.outputs.VERSION }}-
-            ndk-cache-
-
-      - name: Cache Android cmake
-        uses: actions/cache@v4
-        with:
-          path: /usr/local/lib/android/sdk/cmake
-          key: cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('android/app/build.gradle.kts') }}
-          restore-keys: |
-            cmake-cache-${{ steps.flutter-action.outputs.VERSION }}-
-            cmake-cache-
-
       - name: Build
         run: |
           if [ '${{ github.ref_name }}' == 'main' ]; then
