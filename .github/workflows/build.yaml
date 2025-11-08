@@ -1,10 +1,14 @@
 name: Build
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
 
 env:
   BUILD_NAME: "1.0.${{ github.run_number }}"
@@ -14,6 +18,7 @@ jobs:
     name: Build Android
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.base.repo.full_name != github.event.pull_request.head.repo.full_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -25,6 +30,7 @@ jobs:
           cache: true
 
       - name: Setup Android signing key
+        if: ${{ github.ref_name == 'main' }}
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}" | base64 --decode > android/key.jks
           cat <<EOF > android/key.properties
@@ -49,7 +55,10 @@ jobs:
 
       - name: Build
         run: |
-          flutter build appbundle --release --build-number="${{ github.run_number }}" --build-name="${{ env.BUILD_NAME }}"
+          if [ '${{ github.ref_name }}' == 'main' ]; then
+            flutter build appbundle --release --build-number="${{ github.run_number }}" --build-name="${{ env.BUILD_NAME }}"
+          fi
+
           flutter build apk --debug --build-number="${{ github.run_number }}" --build-name="${{ env.BUILD_NAME }}"
 
       - name: Archive App Bundle
@@ -67,6 +76,7 @@ jobs:
           if-no-files-found: error
 
       - name: Authenticate to GCP
+        if: ${{ github.ref_name == 'main' }}
         uses: google-github-actions/auth@v2
         id: auth
         with:
@@ -74,6 +84,7 @@ jobs:
           workload_identity_provider: '${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
 
       - uses: r0adkll/upload-google-play@v1
+        if: ${{ github.ref_name == 'main' }}
         with:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
