@@ -6,6 +6,10 @@ import 'package:intl/intl.dart';
 
 import 'package:subspace_relay_mobile/services/log.dart';
 
+const pubKeyHexLength = 64;
+
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {

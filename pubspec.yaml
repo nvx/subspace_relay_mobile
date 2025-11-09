@@ -19,6 +19,7 @@ dependencies:
   freezed_annotation: ^3.1.0
   shared_preferences: ^2.5.3
   package_info_plus: ^9.0.0
+  app_links: ^6.4.1
 
   subspace_relay_pb: ^1.0.7
   protobuf: ^5.0.0
