@@ -114,7 +114,7 @@ class Mqtt extends _$Mqtt {
       _client.useWebSocket = true;
       final params = Map<String, dynamic>.from(brokerUrl.queryParametersAll);
       params.remove('trust_server_cert');
-      _client.server = brokerUrl.replace(queryParameters: params).toString();
+      _client.server = brokerUrl.replace(queryParameters: params, port: _client.port).toString();
     }
 
     _client.secure = brokerUrl.scheme == 'mqtts';

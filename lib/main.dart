@@ -94,6 +94,10 @@ class ConnectScreen extends HookConsumerWidget {
       return () => discoveryPublicKeyTextController.removeListener(updateValidChecks);
     }, [discoveryPublicKeyTextController]);
 
+    useEffect(() {
+      updateValidChecks();
+    }, [key]);
+
     connect(WidgetBuilder builder) async {
       await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(discoveryPublicKeyTextController.text));
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text);

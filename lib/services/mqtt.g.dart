@@ -94,7 +94,7 @@ final class MqttProvider
   }
 }
 
-String _$mqttHash() => r'ed09f78df267b0807a195b4e44a8af9d9f91e0c9';
+String _$mqttHash() => r'6553325b4d5fb0b032bde760277d0a837911519a';
 
 final class MqttFamily extends $Family
     with
