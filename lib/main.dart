@@ -67,7 +67,8 @@ class ConnectScreen extends HookConsumerWidget {
         return;
       }
 
-      isValid.value = (parsedUri.scheme == 'mqtt' || parsedUri.scheme == 'mqtts' || parsedUri.scheme == 'ws' || parsedUri.scheme == 'wss') && parsedUri.host.isNotEmpty;
+      isValid.value =
+          (parsedUri.scheme == 'mqtt' || parsedUri.scheme == 'mqtts' || parsedUri.scheme == 'ws' || parsedUri.scheme == 'wss') && parsedUri.host.isNotEmpty;
 
       isDiscoveryPublicKeyValid.value = discoveryPublicKeyTextController.text.isEmpty || discoveryPublicKeyTextController.text.length == _pubKeyHexLength;
     }

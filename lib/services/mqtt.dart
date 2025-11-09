@@ -98,6 +98,8 @@ class Mqtt extends _$Mqtt {
     } else {
       _client.port = switch (brokerUrl.scheme) {
         "mqtts" => 8883,
+        "ws" => 80,
+        "wss" => 443,
         _ => 1883,
       };
     }
