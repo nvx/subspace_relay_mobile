@@ -131,7 +131,7 @@ final class HceRelayProvider
   HceRelay create() => HceRelay();
 }
 
-String _$hceRelayHash() => r'1d386fe0605ce86f429f3a99a4aa7b816189707b';
+String _$hceRelayHash() => r'a0d5489f4cd5ed690fc53c398afc05a21836eb9f';
 
 abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
   FutureOr<HceRelayState> build();

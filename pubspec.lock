@@ -977,10 +977,10 @@ packages:
     dependency: "direct main"
     description:
       name: subspace_relay_pb
-      sha256: "0549477a4ae967f01c1c750761ccb6227769e5bd71d892188101f7963e9fcef1"
+      sha256: "6721badc7f57fadc0bb01ec7c623e31037edc887cac9d6944608ac138509d8a5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.7"
+    version: "1.0.9"
   term_glyph:
     dependency: transitive
     description:

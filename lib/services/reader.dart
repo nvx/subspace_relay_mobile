@@ -90,6 +90,7 @@ class ReaderRelay extends _$ReaderRelay {
     );
 
     final relayDiscovery = $pb.RelayDiscovery(relayId: relayId.relayId, relayInfo: relayInfo);
+    final supportedPayloadTypesSet = relayInfo.supportedPayloadTypes.toSet();
     final discoveryPubKey = await ref.read(discoveryPublicKeyProvider.future);
 
     if (!ref.mounted) {
@@ -113,7 +114,8 @@ class ReaderRelay extends _$ReaderRelay {
         case $pb.Message_Message.requestRelayDiscovery:
           final req = msg.message.requestRelayDiscovery;
           if (req.controllerPublicKey.length != 32 ||
-              (req.payloadType != $pb.PayloadType.PAYLOAD_TYPE_UNSPECIFIED && !relayInfo.supportedPayloadTypes.contains(req.payloadType)) ||
+              (!req.payloadTypes.contains($pb.PayloadType.PAYLOAD_TYPE_UNSPECIFIED) &&
+                  supportedPayloadTypesSet.intersection(req.payloadTypes.toSet()).isEmpty) ||
               !listEquals(discoveryPubKey, req.controllerPublicKey)) {
             break;
           }

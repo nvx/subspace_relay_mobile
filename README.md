@@ -20,7 +20,7 @@ To instead use websockets to connect to `wss://user:pass@example.com/mqtt` and s
 * `/reader` start Reader
 * `/reader-dynamic` start Reader Dynamic
 
-### Paramaters
+### Parameters
 * `tls` set to `false` to disable tls
 * `discovery` set to 64 hex bytes of X25519 public key to enable discovery, or empty to clear out the pubkey. If omitted the discovery public key will not be changed
 * `websocket` set to true to use a websocket connection
