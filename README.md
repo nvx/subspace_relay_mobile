@@ -1,5 +1,9 @@
 # Subspace Relay Mobile
 
+Mobile app that implements a [Subspace Relay](https://github.com/nvx/subspace-relay) on Android.
+
+Currently supports relay mode with Android HCE and as a reader.
+
 ## App deep links
 
 Overall format: `subspace-relay://[user[:pass]@]mqtt-server-host[:port][/start-mode][?parameters]`
@@ -21,4 +25,3 @@ To instead use websockets to connect to `wss://user:pass@example.com/mqtt` and s
 * `discovery` set to 64 hex bytes of X25519 public key to enable discovery, or empty to clear out the pubkey. If omitted the discovery public key will not be changed
 * `websocket` set to true to use a websocket connection
 * `path` set if a path component is required for websocket connections
-tls=false&discovery=pubkey&websocket=true&path=/mqtt
