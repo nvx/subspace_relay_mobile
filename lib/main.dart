@@ -78,7 +78,9 @@ class MyApp extends HookConsumerWidget {
           }
         }
 
-        await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrl.toString());
+        if (brokerUrl.host.isNotEmpty) {
+          await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrl.toString());
+        }
 
         if (!context.mounted) {
           return;
