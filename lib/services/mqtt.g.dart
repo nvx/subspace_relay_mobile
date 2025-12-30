@@ -10,10 +10,10 @@ part of 'mqtt.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BrokerUrl)
-const brokerUrlProvider = BrokerUrlProvider._();
+final brokerUrlProvider = BrokerUrlProvider._();
 
 final class BrokerUrlProvider extends $AsyncNotifierProvider<BrokerUrl, Uri> {
-  const BrokerUrlProvider._()
+  BrokerUrlProvider._()
     : super(
         from: null,
         argument: null,
@@ -39,7 +39,6 @@ abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<Uri>, Uri>;
     final element =
         ref.element
@@ -49,16 +48,16 @@ abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(Mqtt)
-const mqttProvider = MqttFamily._();
+final mqttProvider = MqttFamily._();
 
 final class MqttProvider
     extends $AsyncNotifierProvider<Mqtt, Stream<RelayMessage>> {
-  const MqttProvider._({
+  MqttProvider._({
     required MqttFamily super.from,
     required RelayId super.argument,
   }) : super(
@@ -105,7 +104,7 @@ final class MqttFamily extends $Family
           FutureOr<Stream<RelayMessage>>,
           RelayId
         > {
-  const MqttFamily._()
+  MqttFamily._()
     : super(
         retry: null,
         name: r'mqttProvider',
@@ -129,7 +128,6 @@ abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<AsyncValue<Stream<RelayMessage>>, Stream<RelayMessage>>;
@@ -144,6 +142,6 @@ abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

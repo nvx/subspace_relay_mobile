@@ -10,10 +10,10 @@ part of 'reader.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(Reader)
-const readerProvider = ReaderProvider._();
+final readerProvider = ReaderProvider._();
 
 final class ReaderProvider extends $AsyncNotifierProvider<Reader, NfcTag?> {
-  const ReaderProvider._()
+  ReaderProvider._()
     : super(
         from: null,
         argument: null,
@@ -39,7 +39,6 @@ abstract class _$Reader extends $AsyncNotifier<NfcTag?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<NfcTag?>, NfcTag?>;
     final element =
         ref.element
@@ -49,16 +48,16 @@ abstract class _$Reader extends $AsyncNotifier<NfcTag?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(ReaderRelay)
-const readerRelayProvider = ReaderRelayFamily._();
+final readerRelayProvider = ReaderRelayFamily._();
 
 final class ReaderRelayProvider
     extends $AsyncNotifierProvider<ReaderRelay, ReaderRelayState?> {
-  const ReaderRelayProvider._({
+  ReaderRelayProvider._({
     required ReaderRelayFamily super.from,
     required bool super.argument,
   }) : super(
@@ -105,7 +104,7 @@ final class ReaderRelayFamily extends $Family
           FutureOr<ReaderRelayState?>,
           bool
         > {
-  const ReaderRelayFamily._()
+  ReaderRelayFamily._()
     : super(
         retry: null,
         name: r'readerRelayProvider',
@@ -129,7 +128,6 @@ abstract class _$ReaderRelay extends $AsyncNotifier<ReaderRelayState?> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(_$args);
     final ref =
         this.ref as $Ref<AsyncValue<ReaderRelayState?>, ReaderRelayState?>;
     final element =
@@ -140,6 +138,6 @@ abstract class _$ReaderRelay extends $AsyncNotifier<ReaderRelayState?> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, () => build(_$args));
   }
 }

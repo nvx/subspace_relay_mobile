@@ -10,12 +10,12 @@ part of 'version.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(appVersion)
-const appVersionProvider = AppVersionProvider._();
+final appVersionProvider = AppVersionProvider._();
 
 final class AppVersionProvider
     extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
     with $FutureModifier<String>, $FutureProvider<String> {
-  const AppVersionProvider._()
+  AppVersionProvider._()
     : super(
         from: null,
         argument: null,

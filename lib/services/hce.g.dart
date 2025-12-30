@@ -10,10 +10,10 @@ part of 'hce.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(HceActive)
-const hceActiveProvider = HceActiveProvider._();
+final hceActiveProvider = HceActiveProvider._();
 
 final class HceActiveProvider extends $NotifierProvider<HceActive, bool> {
-  const HceActiveProvider._()
+  HceActiveProvider._()
     : super(
         from: null,
         argument: null,
@@ -47,7 +47,6 @@ abstract class _$HceActive extends $Notifier<bool> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -57,16 +56,16 @@ abstract class _$HceActive extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(Hce)
-const hceProvider = HceProvider._();
+final hceProvider = HceProvider._();
 
 final class HceProvider
     extends $AsyncNotifierProvider<Hce, Stream<Uint8List?>> {
-  const HceProvider._()
+  HceProvider._()
     : super(
         from: null,
         argument: null,
@@ -92,7 +91,6 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref =
         this.ref as $Ref<AsyncValue<Stream<Uint8List?>>, Stream<Uint8List?>>;
     final element =
@@ -103,16 +101,16 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(HceRelay)
-const hceRelayProvider = HceRelayProvider._();
+final hceRelayProvider = HceRelayProvider._();
 
 final class HceRelayProvider
     extends $AsyncNotifierProvider<HceRelay, HceRelayState> {
-  const HceRelayProvider._()
+  HceRelayProvider._()
     : super(
         from: null,
         argument: null,
@@ -138,7 +136,6 @@ abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<HceRelayState>, HceRelayState>;
     final element =
         ref.element
@@ -148,6 +145,6 @@ abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

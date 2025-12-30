@@ -10,12 +10,12 @@ part of 'relay_id.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(relayId)
-const relayIdProvider = RelayIdProvider._();
+final relayIdProvider = RelayIdProvider._();
 
 final class RelayIdProvider
     extends $FunctionalProvider<AsyncValue<RelayId>, RelayId, FutureOr<RelayId>>
     with $FutureModifier<RelayId>, $FutureProvider<RelayId> {
-  const RelayIdProvider._()
+  RelayIdProvider._()
     : super(
         from: null,
         argument: null,

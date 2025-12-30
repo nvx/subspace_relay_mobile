@@ -10,11 +10,11 @@ part of 'discovery.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(DiscoveryPublicKey)
-const discoveryPublicKeyProvider = DiscoveryPublicKeyProvider._();
+final discoveryPublicKeyProvider = DiscoveryPublicKeyProvider._();
 
 final class DiscoveryPublicKeyProvider
     extends $AsyncNotifierProvider<DiscoveryPublicKey, List<int>> {
-  const DiscoveryPublicKeyProvider._()
+  DiscoveryPublicKeyProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,7 +41,6 @@ abstract class _$DiscoveryPublicKey extends $AsyncNotifier<List<int>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<AsyncValue<List<int>>, List<int>>;
     final element =
         ref.element
@@ -51,6 +50,6 @@ abstract class _$DiscoveryPublicKey extends $AsyncNotifier<List<int>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

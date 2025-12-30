@@ -10,11 +10,11 @@ part of 'log.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(RemoteLog)
-const remoteLogProvider = RemoteLogProvider._();
+final remoteLogProvider = RemoteLogProvider._();
 
 final class RemoteLogProvider
     extends $NotifierProvider<RemoteLog, List<LogEntry>> {
-  const RemoteLogProvider._()
+  RemoteLogProvider._()
     : super(
         from: null,
         argument: null,
@@ -48,7 +48,6 @@ abstract class _$RemoteLog extends $Notifier<List<LogEntry>> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<List<LogEntry>, List<LogEntry>>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$RemoteLog extends $Notifier<List<LogEntry>> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

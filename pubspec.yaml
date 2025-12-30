@@ -13,9 +13,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   async: ^2.13.0
   plugin_platform_interface: ^2.1.8
-  hooks_riverpod: 3.0.2 # 3.0.3 has a bug - https://github.com/rrousselGit/riverpod/issues/4401 TODO: unpin when 3.0.4 is released
+  hooks_riverpod: ^3.1.0
   flutter_hooks: ^0.21.2
-  riverpod_annotation: ^3.0.0
+  riverpod_annotation: ^4.0.0
   freezed_annotation: ^3.1.0
   shared_preferences: ^2.5.3
   package_info_plus: ^9.0.0
@@ -27,7 +27,11 @@ dependencies:
   uuid: ^4.5.1
   cryptography_plus: ^2.7.1
   cryptography_flutter_plus: ^2.3.4
-  nfc_manager: ^4.1.1
+  nfc_manager:
+    # PR https://github.com/okadan/flutter-nfc-manager/pull/263 fixes https://github.com/okadan/flutter-nfc-manager/issues/252
+    git:
+      url: https://github.com/okadan/flutter-nfc-manager.git
+      ref: 95bfd8750207b2bcecfbf9bedb7055e4916db06a
 
   convert: ^3.1.2
   typed_data: ^1.4.0
@@ -39,7 +43,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  riverpod_generator: ^3.0.0
+  riverpod_generator: ^4.0.0
   build_runner: ^2.5.4
   custom_lint: ^0.8.0
   riverpod_lint: ^3.0.0
