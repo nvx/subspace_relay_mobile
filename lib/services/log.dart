@@ -9,7 +9,7 @@ sealed class LogEntry with _$LogEntry {
   const factory LogEntry({required DateTime timestamp, required String message}) = _LogEntry;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class RemoteLog extends _$RemoteLog {
   @override
   List<LogEntry> build() {

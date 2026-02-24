@@ -1,0 +1,148 @@
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:subspace_relay_mobile/services/favorites.dart';
+
+class FavoritesScreen extends HookConsumerWidget {
+  final String currentBrokerUrl;
+  final String currentDiscoveryPublicKey;
+  final String currentRelayId;
+  final String currentName;
+
+  const FavoritesScreen({
+    this.currentBrokerUrl = '',
+    this.currentDiscoveryPublicKey = '',
+    this.currentRelayId = '',
+    this.currentName = '',
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favorites = ref.watch(favoritesListProvider);
+    final entries = favorites.value ?? [];
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Favorites'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            tooltip: 'Add favorite',
+            onPressed: () => _showAddDialog(context, ref),
+          ),
+        ],
+      ),
+      body: entries.isEmpty
+          ? Center(child: Text('No favorites yet.\nTap + to add one.', textAlign: TextAlign.center))
+          : ListView.builder(
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                final entry = entries[index];
+                return Dismissible(
+                  key: Key(entry.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: EdgeInsets.only(right: 16), child: Icon(Icons.delete, color: Colors.white)),
+                  onDismissed: (_) => ref.read(favoritesListProvider.notifier).remove(entry.id),
+                  child: ListTile(
+                    leading: Icon(Icons.star, color: Colors.amber),
+                    title: Text(entry.name, overflow: TextOverflow.ellipsis),
+                    subtitle: Text(Uri.tryParse(entry.brokerUrl)?.host ?? entry.brokerUrl, style: Theme.of(context).textTheme.bodySmall),
+                    trailing: IconButton(
+                      icon: Icon(Icons.edit, size: 20),
+                      onPressed: () => _showEditDialog(context, ref, entry),
+                    ),
+                    onTap: () => Navigator.pop(context, entry),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Future<void> _showAddDialog(BuildContext context, WidgetRef ref) async {
+    final host = Uri.tryParse(currentBrokerUrl)?.host ?? currentBrokerUrl;
+    final nameCtrl = TextEditingController(text: currentName.isNotEmpty ? currentName : host);
+    final brokerCtrl = TextEditingController(text: currentBrokerUrl);
+    final discoveryCtrl = TextEditingController(text: currentDiscoveryPublicKey);
+    final relayIdCtrl = TextEditingController(text: currentRelayId);
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Add Favorite'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameCtrl, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
+              SizedBox(height: 8),
+              TextField(controller: brokerCtrl, decoration: InputDecoration(labelText: 'Broker URL')),
+              SizedBox(height: 8),
+              TextField(controller: discoveryCtrl, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+              SizedBox(height: 8),
+              TextField(controller: relayIdCtrl, decoration: InputDecoration(labelText: 'Relay ID')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
+        ],
+      ),
+    );
+
+    if (result == true && nameCtrl.text.isNotEmpty) {
+      await ref.read(favoritesListProvider.notifier).add(
+            name: nameCtrl.text,
+            brokerUrl: brokerCtrl.text,
+            discoveryPublicKey: discoveryCtrl.text,
+            relayId: relayIdCtrl.text,
+          );
+    }
+  }
+
+  Future<void> _showEditDialog(BuildContext context, WidgetRef ref, Favorite entry) async {
+    final nameCtrl = TextEditingController(text: entry.name);
+    final brokerCtrl = TextEditingController(text: entry.brokerUrl);
+    final discoveryCtrl = TextEditingController(text: entry.discoveryPublicKey);
+    final relayIdCtrl = TextEditingController(text: entry.relayId);
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Favorite'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameCtrl, decoration: InputDecoration(labelText: 'Name')),
+              SizedBox(height: 8),
+              TextField(controller: brokerCtrl, decoration: InputDecoration(labelText: 'Broker URL')),
+              SizedBox(height: 8),
+              TextField(controller: discoveryCtrl, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+              SizedBox(height: 8),
+              TextField(controller: relayIdCtrl, decoration: InputDecoration(labelText: 'Relay ID')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await ref.read(favoritesListProvider.notifier).updateFavorite(
+            entry.copyWith(
+              name: nameCtrl.text.isNotEmpty ? nameCtrl.text : entry.name,
+              brokerUrl: brokerCtrl.text,
+              discoveryPublicKey: discoveryCtrl.text,
+              relayId: relayIdCtrl.text,
+            ),
+          );
+    }
+  }
+}

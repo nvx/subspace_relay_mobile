@@ -20,7 +20,7 @@ final class RemoteLogProvider
         argument: null,
         retry: null,
         name: r'remoteLogProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class RemoteLogProvider
   }
 }
 
-String _$remoteLogHash() => r'c04d077a3941733446a3225e6790b57df12f7e62';
+String _$remoteLogHash() => r'abc7ba608b4f618f7fc03d0e6b7bba7e22219878';
 
 abstract class _$RemoteLog extends $Notifier<List<LogEntry>> {
   List<LogEntry> build();

@@ -25,3 +25,4 @@ To instead use websockets to connect to `wss://user:pass@example.com/mqtt` and s
 * `discovery` set to 64 hex bytes of X25519 public key to enable discovery, or empty to clear out the pubkey. If omitted the discovery public key will not be changed
 * `websocket` set to true to use a websocket connection
 * `path` set if a path component is required for websocket connections
+* `name` favorites name if connection is saved
