@@ -68,38 +68,45 @@ class FavoritesScreen extends HookConsumerWidget {
     final discoveryCtrl = TextEditingController(text: currentDiscoveryPublicKey);
     final relayIdCtrl = TextEditingController(text: currentRelayId);
 
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Add Favorite'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nameCtrl, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
-              SizedBox(height: 8),
-              TextField(controller: brokerCtrl, decoration: InputDecoration(labelText: 'Broker URL')),
-              SizedBox(height: 8),
-              TextField(controller: discoveryCtrl, decoration: InputDecoration(labelText: 'Discovery Public Key')),
-              SizedBox(height: 8),
-              TextField(controller: relayIdCtrl, decoration: InputDecoration(labelText: 'Relay ID')),
-            ],
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Add Favorite'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nameCtrl, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
+                SizedBox(height: 8),
+                TextField(controller: brokerCtrl, decoration: InputDecoration(labelText: 'Broker URL')),
+                SizedBox(height: 8),
+                TextField(controller: discoveryCtrl, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+                SizedBox(height: 8),
+                TextField(controller: relayIdCtrl, decoration: InputDecoration(labelText: 'Relay ID')),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
-        ],
-      ),
-    );
+      );
 
-    if (result == true && nameCtrl.text.isNotEmpty) {
-      await ref.read(favoritesListProvider.notifier).add(
-            name: nameCtrl.text,
-            brokerUrl: brokerCtrl.text,
-            discoveryPublicKey: discoveryCtrl.text,
-            relayId: relayIdCtrl.text,
-          );
+      if (result == true && nameCtrl.text.isNotEmpty) {
+        await ref.read(favoritesListProvider.notifier).add(
+              name: nameCtrl.text,
+              brokerUrl: brokerCtrl.text,
+              discoveryPublicKey: discoveryCtrl.text,
+              relayId: relayIdCtrl.text,
+            );
+      }
+    } finally {
+      nameCtrl.dispose();
+      brokerCtrl.dispose();
+      discoveryCtrl.dispose();
+      relayIdCtrl.dispose();
     }
   }
 
