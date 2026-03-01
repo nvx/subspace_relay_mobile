@@ -10,37 +10,40 @@ class HistoryScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(connectionHistoryProvider);
-    final entries = history.value ?? [];
 
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text('History')),
-      body: entries.isEmpty
-          ? Center(child: Text('No history yet'))
-          : ListView.builder(
-              itemCount: entries.length,
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                final modeLabel = switch (entry.mode) {
-                  ConnectionMode.hce => 'HCE',
-                  ConnectionMode.reader => 'Reader',
-                  ConnectionMode.readerDynamic => 'Reader (Dynamic)',
-                };
-                final host = Uri.tryParse(entry.brokerUrl)?.host ?? entry.brokerUrl;
-                return Dismissible(
-                  key: Key(entry.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: EdgeInsets.only(right: 16), child: Icon(Icons.delete, color: Colors.white)),
-                  onDismissed: (_) => ref.read(connectionHistoryProvider.notifier).remove(entry.id),
-                  child: ListTile(
-                    title: Text(entry.name, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('$modeLabel · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}', style: Theme.of(context).textTheme.bodySmall),
-                    isThreeLine: true,
-                    trailing: entry.log.isNotEmpty ? Icon(Icons.article_outlined, size: 18) : null,
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoryDetailScreen(entry: entry))),
-                  ),
-                );
-              },
-            ),
+      body: history.when(
+        data: (entries) => entries.isEmpty
+            ? Center(child: Text('No history yet'))
+            : ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final modeLabel = switch (entry.mode) {
+                    ConnectionMode.hce => 'HCE',
+                    ConnectionMode.reader => 'Reader',
+                    ConnectionMode.readerDynamic => 'Reader (Dynamic)',
+                  };
+                  final host = Uri.tryParse(entry.brokerUrl)?.host ?? entry.brokerUrl;
+                  return Dismissible(
+                    key: Key(entry.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: EdgeInsets.only(right: 16), child: Icon(Icons.delete, color: Colors.white)),
+                    onDismissed: (_) => ref.read(connectionHistoryProvider.notifier).remove(entry.id),
+                    child: ListTile(
+                      title: Text(entry.name, overflow: TextOverflow.ellipsis),
+                      subtitle: Text('$modeLabel · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}', style: Theme.of(context).textTheme.bodySmall),
+                      isThreeLine: true,
+                      trailing: entry.log.isNotEmpty ? Icon(Icons.article_outlined, size: 18) : null,
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoryDetailScreen(entry: entry))),
+                    ),
+                  );
+                },
+              ),
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text('Failed to load history')),
+      ),
     );
   }
 }
