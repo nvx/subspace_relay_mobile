@@ -8,9 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:subspace_relay_mobile/favorites_screen.dart';
-import 'package:subspace_relay_mobile/hce_screen.dart';
 import 'package:subspace_relay_mobile/history_screen.dart';
-import 'package:subspace_relay_mobile/reader_screen.dart';
 import 'package:subspace_relay_mobile/util.dart';
 import 'package:subspace_relay_mobile/hooks.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
@@ -36,10 +34,6 @@ class ConnectScreen extends HookConsumerWidget {
     final isBrokerEmpty = useState(true);
     final isBrokerValid = useState(false);
     final isDiscoveryPublicKeyValid = useState(true);
-    // Skip flag to suppress listener-driven validation during batch text controller updates.
-    // useRef persists the same ObjectRef across rebuilds so all closures (including those
-    // captured by useEffect) see the same flag.
-    final skipValidation = useRef(false);
     final readyToConnect = isBrokerValid.value && !isBrokerEmpty.value && isDiscoveryPublicKeyValid.value;
 
     if (kDebugMode) {
@@ -47,8 +41,6 @@ class ConnectScreen extends HookConsumerWidget {
     }
 
     void updateValidChecks() {
-      if (skipValidation.value) return;
-
       final dkText = discoveryPublicKeyTextController.text;
       isDiscoveryPublicKeyValid.value = dkText.isEmpty || dkText.length == pubKeyHexLength;
 
@@ -71,10 +63,8 @@ class ConnectScreen extends HookConsumerWidget {
     // After this, text controllers are the source of truth — never overwritten by providers.
     if (!initialValueLoaded.value && brokerUrl.hasValue && discoveryPublicKey.hasValue) {
       initialValueLoaded.value = true;
-      skipValidation.value = true;
       brokerUrlTextController.text = brokerUrl.value.toString();
       discoveryPublicKeyTextController.text = hex.encode(discoveryPublicKey.value!).toUpperCase();
-      skipValidation.value = false;
       updateValidChecks();
     }
 
@@ -117,7 +107,7 @@ class ConnectScreen extends HookConsumerWidget {
       },
     );
 
-    connect(WidgetBuilder builder, ConnectionMode mode) async {
+    connect(ConnectionMode mode) async {
       if (kDebugMode) {
         print('connect: broker="${brokerUrlTextController.text}" dkLen=${discoveryPublicKeyTextController.text.length}');
       }
@@ -139,7 +129,7 @@ class ConnectScreen extends HookConsumerWidget {
           print('connect: navigating, historyId=$historyId relayId=${resolvedRelayId.relayId}');
         }
         if (context.mounted) {
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: builder), ModalRoute.withName('/'));
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: widgetBuilderForMode(mode)), ModalRoute.withName('/'));
         }
       } catch (e, st) {
         if (kDebugMode) {
@@ -152,13 +142,8 @@ class ConnectScreen extends HookConsumerWidget {
       if (kDebugMode) {
         print('loadFavorite: name=${fav.name} broker=${fav.brokerUrl} dkLen=${fav.discoveryPublicKey.length} relayId=${fav.relayId}');
       }
-      // Suppress listener-driven validation while updating both controllers
-      skipValidation.value = true;
       brokerUrlTextController.text = fav.brokerUrl;
       discoveryPublicKeyTextController.text = fav.discoveryPublicKey;
-      skipValidation.value = false;
-
-      // Validate with consistent state
       updateValidChecks();
 
       // Sync providers to match the favorite
@@ -187,7 +172,6 @@ class ConnectScreen extends HookConsumerWidget {
             tooltip: 'Favorites',
             onPressed: () async {
               final currentRelayId = ref.read(relayIdProvider).value?.relayId ?? '';
-              final deepLinkName = ref.read(deepLinkNameProvider);
               final fav = await Navigator.push<Favorite>(
                 context,
                 MaterialPageRoute(
@@ -195,7 +179,6 @@ class ConnectScreen extends HookConsumerWidget {
                     currentBrokerUrl: brokerUrlTextController.text,
                     currentDiscoveryPublicKey: discoveryPublicKeyTextController.text,
                     currentRelayId: currentRelayId,
-                    currentName: deepLinkName,
                   ),
                 ),
               );
@@ -261,13 +244,13 @@ class ConnectScreen extends HookConsumerWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect((context) => HceRelayScreen(), ConnectionMode.hce), 
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.hce), 
                 child: const Text("Start HCE")),
               ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect((context) => ReaderRelayScreen(false), ConnectionMode.reader), 
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.reader), 
                 child: const Text("Start Reader")),
               ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect((context) => ReaderRelayScreen(true), ConnectionMode.readerDynamic),
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.readerDynamic),
                 child: const Text("Start Reader (Dynamic)"),
               ),
             ],
