@@ -68,41 +68,35 @@ class FavoritesScreen extends HookConsumerWidget {
     final brokerTextController = TextEditingController(text: currentBrokerUrl);
     final discoveryTextController = TextEditingController(text: currentDiscoveryPublicKey);
 
-    try {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Add Favorite'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(controller: nameTextController, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
-                SizedBox(height: 8),
-                TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
-                SizedBox(height: 8),
-                TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
-              ],
-            ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Add Favorite'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameTextController, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
+              SizedBox(height: 8),
+              TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
+              SizedBox(height: 8),
+              TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
-          ],
         ),
-      );
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
+        ],
+      ),
+    );
 
-      if (result == true && nameTextController.text.isNotEmpty) {
-        await ref.read(favoritesListProvider.notifier).add(
-              name: nameTextController.text,
-              brokerUrl: brokerTextController.text,
-              discoveryPublicKey: discoveryTextController.text,
-            );
-      }
-    } finally {
-      nameTextController.dispose();
-      brokerTextController.dispose();
-      discoveryTextController.dispose();
+    if (result == true && nameTextController.text.isNotEmpty) {
+      await ref.read(favoritesListProvider.notifier).add(
+            name: nameTextController.text,
+            brokerUrl: brokerTextController.text,
+            discoveryPublicKey: discoveryTextController.text,
+          );
     }
   }
 
@@ -111,43 +105,37 @@ class FavoritesScreen extends HookConsumerWidget {
     final brokerTextController = TextEditingController(text: entry.brokerUrl);
     final discoveryTextController = TextEditingController(text: entry.discoveryPublicKey);
 
-    try {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Edit Favorite'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(controller: nameTextController, decoration: InputDecoration(labelText: 'Name')),
-                SizedBox(height: 8),
-                TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
-                SizedBox(height: 8),
-                TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
-              ],
-            ),
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Favorite'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameTextController, decoration: InputDecoration(labelText: 'Name')),
+              SizedBox(height: 8),
+              TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
+              SizedBox(height: 8),
+              TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
-            TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
-          ],
         ),
-      );
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Save')),
+        ],
+      ),
+    );
 
-      if (result == true) {
-        await ref.read(favoritesListProvider.notifier).updateFavorite(
-              entry.copyWith(
-                name: nameTextController.text.isNotEmpty ? nameTextController.text : entry.name,
-                brokerUrl: brokerTextController.text,
-                discoveryPublicKey: discoveryTextController.text,
-              ),
-            );
-      }
-    } finally {
-      nameTextController.dispose();
-      brokerTextController.dispose();
-      discoveryTextController.dispose();
+    if (result == true) {
+      await ref.read(favoritesListProvider.notifier).updateFavorite(
+            entry.copyWith(
+              name: nameTextController.text.isNotEmpty ? nameTextController.text : entry.name,
+              brokerUrl: brokerTextController.text,
+              discoveryPublicKey: discoveryTextController.text,
+            ),
+          );
     }
   }
 }
