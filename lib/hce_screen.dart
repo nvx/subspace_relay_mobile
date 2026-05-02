@@ -4,16 +4,25 @@ import 'package:vibration/vibration.dart';
 
 import 'package:subspace_relay_mobile/util.dart';
 import 'package:subspace_relay_mobile/services/hce.dart';
+import 'package:subspace_relay_mobile/services/history.dart';
+import 'package:subspace_relay_mobile/services/log.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 
 class HceRelayScreen extends HookConsumerWidget {
-  const HceRelayScreen({super.key});
+  final String? historyId;
+  const HceRelayScreen({this.historyId, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final relayId = ref.watch(relayIdProvider).value?.relayId;
     final relayState = ref.watch(hceRelayProvider);
     final hceActive = ref.watch(hceActiveProvider);
+
+    if (historyId != null) {
+      ref.listen(remoteLogProvider, (_, entries) {
+        ref.read(connectionHistoryProvider.notifier).updateLog(historyId!, formatLogEntries(entries));
+      });
+    }
 
     ref.listen(hceRelayProvider, (old, now) async {
       if (now.value == null || old == null || !old.hasValue) {

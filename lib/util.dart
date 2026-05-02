@@ -10,6 +10,9 @@ const pubKeyHexLength = 64;
 
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
+String formatLogEntries(Iterable<LogEntry> entries) =>
+    entries.map((e) => '[${DateFormat('HH:mm:ss').format(e.timestamp)}] ${e.message}').join('\n');
+
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
@@ -45,7 +48,7 @@ class RemoteLogWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final remoteLog = ref.watch(remoteLogProvider).map((e) => '[${DateFormat('HH:mm:ss').format(e.timestamp)}] ${e.message}').join('\n');
+    final remoteLog = formatLogEntries(ref.watch(remoteLogProvider));
     final textEditingController = useTextEditingController();
 
     textEditingController.text = remoteLog;

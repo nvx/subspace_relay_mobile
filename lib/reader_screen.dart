@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:subspace_relay_mobile/util.dart';
+import 'package:subspace_relay_mobile/services/history.dart';
+import 'package:subspace_relay_mobile/services/log.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 import 'package:subspace_relay_mobile/services/reader.dart';
@@ -26,7 +28,8 @@ class ReaderRelayCardInfo extends HookConsumerWidget {
 
 class ReaderRelayScreen extends HookConsumerWidget {
   final bool _dynamicRelayId;
-  const ReaderRelayScreen(this._dynamicRelayId, {super.key});
+  final String? historyId;
+  const ReaderRelayScreen(this._dynamicRelayId, {this.historyId, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,6 +39,12 @@ class ReaderRelayScreen extends HookConsumerWidget {
     if (!_dynamicRelayId && relayId != null) {
       // keep mqtt session alive even if we lose the card briefly in non-dynamic mode
       ref.watch(mqttProvider(relayId));
+    }
+
+    if (historyId != null) {
+      ref.listen(remoteLogProvider, (_, entries) {
+        ref.read(connectionHistoryProvider.notifier).updateLog(historyId!, formatLogEntries(entries));
+      });
     }
 
     return Scaffold(

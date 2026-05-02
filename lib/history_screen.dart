@@ -20,11 +20,6 @@ class HistoryScreen extends HookConsumerWidget {
                 itemCount: entries.length,
                 itemBuilder: (context, index) {
                   final entry = entries[index];
-                  final modeLabel = switch (entry.mode) {
-                    ConnectionMode.hce => 'HCE',
-                    ConnectionMode.reader => 'Reader',
-                    ConnectionMode.readerDynamic => 'Reader (Dynamic)',
-                  };
                   final host = Uri.tryParse(entry.brokerUrl)?.host ?? entry.brokerUrl;
                   return Dismissible(
                     key: Key(entry.id),
@@ -33,7 +28,7 @@ class HistoryScreen extends HookConsumerWidget {
                     onDismissed: (_) => ref.read(connectionHistoryProvider.notifier).remove(entry.id),
                     child: ListTile(
                       title: Text(entry.name, overflow: TextOverflow.ellipsis),
-                      subtitle: Text('$modeLabel · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}', style: Theme.of(context).textTheme.bodySmall),
+                      subtitle: Text('${entry.mode.displayName} · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}', style: Theme.of(context).textTheme.bodySmall),
                       isThreeLine: true,
                       trailing: entry.log.isNotEmpty ? Icon(Icons.article_outlined, size: 18) : null,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoryDetailScreen(entry: entry))),
@@ -54,12 +49,6 @@ class _HistoryDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modeLabel = switch (entry.mode) {
-      ConnectionMode.hce => 'HCE',
-      ConnectionMode.reader => 'Reader',
-      ConnectionMode.readerDynamic => 'Reader (Dynamic)',
-    };
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -74,7 +63,7 @@ class _HistoryDetailScreen extends StatelessWidget {
               _infoRow('Broker', entry.brokerUrl),
               if (entry.discoveryPublicKey.isNotEmpty) _infoRow('Discovery Key', entry.discoveryPublicKey),
               if (entry.relayId.isNotEmpty) _infoRow('Relay ID', entry.relayId),
-              _infoRow('Mode', modeLabel),
+              _infoRow('Mode', entry.mode.displayName),
               _infoRow('Time', DateFormat('MMM d, y h:mm:ss a').format(entry.timestamp)),
               SizedBox(height: 10),
               Expanded(

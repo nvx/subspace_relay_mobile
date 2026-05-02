@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/misc.dart';
 import 'package:app_links/app_links.dart';
 
 import 'package:subspace_relay_mobile/connect_screen.dart';
+import 'package:subspace_relay_mobile/connection_mode.dart';
 import 'package:subspace_relay_mobile/util.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/history.dart';
@@ -89,30 +90,26 @@ class MyApp extends HookConsumerWidget {
           return;
         }
 
-        connect(ConnectionMode mode) async {
-          try {
-            final currentRelayId = (await ref.read(relayIdProvider.future)).relayId;
-            await ref.read(connectionHistoryProvider.notifier).add(
-                  brokerUrl: brokerUrl.toString(),
-                  discoveryPublicKey: pubKey ?? '',
-                  relayId: currentRelayId,
-                  mode: mode,
-                  name: deepLinkName,
-                );
-            if (!context.mounted) return;
-            navigatorKey.currentState?.pushAndRemoveUntil(MaterialPageRoute(builder: widgetBuilderForMode(mode)), ModalRoute.withName('/'));
-          } catch (e) {
-            if (kDebugMode) print('Deep link connect error: $e');
-          }
+        Future<void> connect(ConnectionMode mode) async {
+          final currentRelayId = (await ref.read(relayIdProvider.future)).relayId;
+          final historyId = await ref.read(connectionHistoryProvider.notifier).add(
+                brokerUrl: brokerUrl.toString(),
+                discoveryPublicKey: pubKey ?? '',
+                relayId: currentRelayId,
+                mode: mode,
+                name: deepLinkName,
+              );
+          if (!context.mounted) return;
+          navigatorKey.currentState?.pushAndRemoveUntil(MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
         }
 
         switch (uri.path) {
           case '/card':
-            connect(ConnectionMode.hce);
+            await connect(ConnectionMode.hce);
           case '/reader':
-            connect(ConnectionMode.reader);
+            await connect(ConnectionMode.reader);
           case '/reader-dynamic':
-            connect(ConnectionMode.readerDynamic);
+            await connect(ConnectionMode.readerDynamic);
         }
       });
       return subscription.cancel;

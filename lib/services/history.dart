@@ -1,26 +1,15 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:subspace_relay_mobile/hce_screen.dart';
-import 'package:subspace_relay_mobile/reader_screen.dart';
+import 'package:subspace_relay_mobile/connection_mode.dart';
 import 'package:subspace_relay_mobile/services/prefs.dart';
 
 part 'history.g.dart';
 part 'history.freezed.dart';
 
 const kPrefsConnectionHistory = 'connection_history';
-
-@JsonEnum()
-enum ConnectionMode { hce, reader, readerDynamic }
-
-WidgetBuilder widgetBuilderForMode(ConnectionMode mode) => switch (mode) {
-  ConnectionMode.hce => (_) => HceRelayScreen(),
-  ConnectionMode.reader => (_) => ReaderRelayScreen(false),
-  ConnectionMode.readerDynamic => (_) => ReaderRelayScreen(true),
-};
 
 @freezed
 sealed class HistoryEntry with _$HistoryEntry {

@@ -29,7 +29,10 @@ sealed class RelayId with _$RelayId {
 Future<RelayId> relayId(Ref ref) async {
   final prefs = ref.watch(prefsProvider);
 
-  String? relayId = await prefs.getString(kPrefsRelayId);
+  String? relayId;
+  if (!ref.isRefresh) {
+    relayId = await prefs.getString(kPrefsRelayId);
+  }
 
   if (relayId == null || relayId.isEmpty) {
     relayId = Uuid().v7().replaceAll('-', '');

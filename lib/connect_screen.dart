@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
+import 'package:subspace_relay_mobile/connection_mode.dart';
 import 'package:subspace_relay_mobile/favorites_screen.dart';
 import 'package:subspace_relay_mobile/history_screen.dart';
 import 'package:subspace_relay_mobile/util.dart';
@@ -14,7 +13,6 @@ import 'package:subspace_relay_mobile/hooks.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/favorites.dart';
 import 'package:subspace_relay_mobile/services/history.dart';
-import 'package:subspace_relay_mobile/services/log.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:subspace_relay_mobile/services/prefs.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
@@ -30,19 +28,13 @@ class ConnectScreen extends HookConsumerWidget {
     final brokerUrlTextController = useTextEditingController();
     final discoveryPublicKeyTextController = useTextEditingController();
     final initialValueLoaded = useState(false);
-    final currentHistoryId = useState<String?>(null);
     final isBrokerEmpty = useState(true);
     final isBrokerValid = useState(false);
     final isDiscoveryPublicKeyValid = useState(true);
     final readyToConnect = isBrokerValid.value && !isBrokerEmpty.value && isDiscoveryPublicKeyValid.value;
 
-    if (kDebugMode) {
-      print('build: readyToConnect=$readyToConnect broker="${brokerUrlTextController.text}" discoveryLen=${discoveryPublicKeyTextController.text.length}');
-    }
-
     void updateValidChecks() {
-      final dkText = discoveryPublicKeyTextController.text;
-      isDiscoveryPublicKeyValid.value = dkText.isEmpty || dkText.length == pubKeyHexLength;
+      isDiscoveryPublicKeyValid.value = discoveryPublicKeyTextController.text.isEmpty || discoveryPublicKeyTextController.text.length == pubKeyHexLength;
 
       isBrokerEmpty.value = brokerUrlTextController.text.isEmpty;
       if (isBrokerEmpty.value) {
@@ -85,80 +77,43 @@ class ConnectScreen extends HookConsumerWidget {
 
     useRouteObserver(
       routeObserver,
-      didPopNext: () async {
+      didPopNext: () {
         if (kDebugMode) {
-          print('didPopNext: currentHistoryId=${currentHistoryId.value}');
-        }
-        // Save remote log to history entry when returning from a connection screen
-        final historyId = currentHistoryId.value;
-        if (historyId != null) {
-          final logEntries = ref.read(remoteLogProvider);
-          if (kDebugMode) {
-            print('Saving log for $historyId: ${logEntries.length} entries');
-          }
-          if (logEntries.isNotEmpty) {
-            final logText = logEntries.map((e) => '[${DateFormat('HH:mm:ss').format(e.timestamp)}] ${e.message}').join('\n');
-            await ref.read(connectionHistoryProvider.notifier).updateLog(historyId, logText);
-          }
-          currentHistoryId.value = null;
-          // Do NOT reset initialValueLoaded here — text controllers already have
-          // the correct values and must not be overwritten by stale provider state.
+          print('didPopNext');
         }
       },
     );
 
-    connect(ConnectionMode mode) async {
-      if (kDebugMode) {
-        print('connect: broker="${brokerUrlTextController.text}" dkLen=${discoveryPublicKeyTextController.text.length}');
-      }
-      try {
-        final dkText = discoveryPublicKeyTextController.text.trim();
-        await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(dkText.isEmpty ? [] : hex.decode(dkText));
-        await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text.trim());
-        ref.invalidate(remoteLogProvider);
-        // Await the relay ID to ensure it's resolved before recording history
-        final resolvedRelayId = await ref.read(relayIdProvider.future);
-        final historyId = await ref.read(connectionHistoryProvider.notifier).add(
-              brokerUrl: brokerUrlTextController.text.trim(),
-              discoveryPublicKey: dkText,
-              relayId: resolvedRelayId.relayId,
-              mode: mode,
-            );
-        currentHistoryId.value = historyId;
-        if (kDebugMode) {
-          print('connect: navigating, historyId=$historyId relayId=${resolvedRelayId.relayId}');
-        }
-        if (context.mounted) {
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: widgetBuilderForMode(mode)), ModalRoute.withName('/'));
-        }
-      } catch (e, st) {
-        if (kDebugMode) {
-          print('connect error: $e\n$st');
-        }
+    Future<void> connect(ConnectionMode mode) async {
+      final dkText = discoveryPublicKeyTextController.text;
+      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(dkText));
+      await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text);
+      // Resolve the relay ID before recording history so the entry has the value used for the connection.
+      final resolvedRelayId = await ref.read(relayIdProvider.future);
+      final historyId = await ref.read(connectionHistoryProvider.notifier).add(
+            brokerUrl: brokerUrlTextController.text,
+            discoveryPublicKey: dkText,
+            relayId: resolvedRelayId.relayId,
+            mode: mode,
+          );
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
       }
     }
 
-    loadFavorite(Favorite fav) async {
-      if (kDebugMode) {
-        print('loadFavorite: name=${fav.name} broker=${fav.brokerUrl} dkLen=${fav.discoveryPublicKey.length} relayId=${fav.relayId}');
-      }
+    Future<void> loadFavorite(Favorite fav) async {
       brokerUrlTextController.text = fav.brokerUrl;
       discoveryPublicKeyTextController.text = fav.discoveryPublicKey;
       updateValidChecks();
 
       // Sync providers to match the favorite
-      final dkText = fav.discoveryPublicKey.trim();
-      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(dkText.isEmpty ? [] : hex.decode(dkText));
+      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(fav.discoveryPublicKey));
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(fav.brokerUrl);
 
       // Load the favorite's relay ID (or keep the current one)
       if (fav.relayId.isNotEmpty) {
         await ref.read(prefsProvider).setString(kPrefsRelayId, fav.relayId);
         ref.invalidate(relayIdProvider);
-      }
-
-      if (kDebugMode) {
-        print('loadFavorite done: isBrokerValid=${isBrokerValid.value} isBrokerEmpty=${isBrokerEmpty.value} isDiscoveryPublicKeyValid=${isDiscoveryPublicKeyValid.value}');
       }
     }
 
@@ -206,9 +161,7 @@ class ConnectScreen extends HookConsumerWidget {
               if (relayId != null)
                 ElevatedButton(
                   child: Text('New RelayID'),
-                  onPressed: () async {
-                    final newId = Uuid().v7().replaceAll('-', '');
-                    await ref.read(prefsProvider).setString(kPrefsRelayId, newId);
+                  onPressed: () {
                     ref.invalidate(relayIdProvider);
                   },
                 ),
@@ -233,6 +186,7 @@ class ConnectScreen extends HookConsumerWidget {
                   controller: discoveryPublicKeyTextController,
                   inputFormatters: <TextInputFormatter>[
                     UpperCaseTextFormatter(),
+                    // only allow hex characters
                     FilteringTextInputFormatter.allow(RegExp("[A-F0-9]")),
                     LengthLimitingTextInputFormatter(pubKeyHexLength),
                   ],
