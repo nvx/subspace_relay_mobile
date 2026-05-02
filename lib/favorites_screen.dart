@@ -6,13 +6,11 @@ import 'package:subspace_relay_mobile/services/favorites.dart';
 class FavoritesScreen extends HookConsumerWidget {
   final String currentBrokerUrl;
   final String currentDiscoveryPublicKey;
-  final String currentRelayId;
   final String currentName;
 
   const FavoritesScreen({
     this.currentBrokerUrl = '',
     this.currentDiscoveryPublicKey = '',
-    this.currentRelayId = '',
     this.currentName = '',
     super.key,
   });
@@ -69,7 +67,6 @@ class FavoritesScreen extends HookConsumerWidget {
     final nameTextController = TextEditingController(text: currentName.isNotEmpty ? currentName : host);
     final brokerTextController = TextEditingController(text: currentBrokerUrl);
     final discoveryTextController = TextEditingController(text: currentDiscoveryPublicKey);
-    final relayIdTextController = TextEditingController(text: currentRelayId);
 
     try {
       final result = await showDialog<bool>(
@@ -85,8 +82,6 @@ class FavoritesScreen extends HookConsumerWidget {
                 TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
                 SizedBox(height: 8),
                 TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
-                SizedBox(height: 8),
-                TextField(controller: relayIdTextController, decoration: InputDecoration(labelText: 'Relay ID')),
               ],
             ),
           ),
@@ -102,14 +97,12 @@ class FavoritesScreen extends HookConsumerWidget {
               name: nameTextController.text,
               brokerUrl: brokerTextController.text,
               discoveryPublicKey: discoveryTextController.text,
-              relayId: relayIdTextController.text,
             );
       }
     } finally {
       nameTextController.dispose();
       brokerTextController.dispose();
       discoveryTextController.dispose();
-      relayIdTextController.dispose();
     }
   }
 
@@ -117,7 +110,6 @@ class FavoritesScreen extends HookConsumerWidget {
     final nameTextController = TextEditingController(text: entry.name);
     final brokerTextController = TextEditingController(text: entry.brokerUrl);
     final discoveryTextController = TextEditingController(text: entry.discoveryPublicKey);
-    final relayIdTextController = TextEditingController(text: entry.relayId);
 
     try {
       final result = await showDialog<bool>(
@@ -133,8 +125,6 @@ class FavoritesScreen extends HookConsumerWidget {
                 TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
                 SizedBox(height: 8),
                 TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
-                SizedBox(height: 8),
-                TextField(controller: relayIdTextController, decoration: InputDecoration(labelText: 'Relay ID')),
               ],
             ),
           ),
@@ -151,7 +141,6 @@ class FavoritesScreen extends HookConsumerWidget {
                 name: nameTextController.text.isNotEmpty ? nameTextController.text : entry.name,
                 brokerUrl: brokerTextController.text,
                 discoveryPublicKey: discoveryTextController.text,
-                relayId: relayIdTextController.text,
               ),
             );
       }
@@ -159,7 +148,6 @@ class FavoritesScreen extends HookConsumerWidget {
       nameTextController.dispose();
       brokerTextController.dispose();
       discoveryTextController.dispose();
-      relayIdTextController.dispose();
     }
   }
 }

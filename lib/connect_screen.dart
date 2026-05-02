@@ -14,7 +14,6 @@ import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/favorites.dart';
 import 'package:subspace_relay_mobile/services/history.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
-import 'package:subspace_relay_mobile/services/prefs.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 
 class ConnectScreen extends HookConsumerWidget {
@@ -109,12 +108,6 @@ class ConnectScreen extends HookConsumerWidget {
       // Sync providers to match the favorite
       await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(fav.discoveryPublicKey));
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(fav.brokerUrl);
-
-      // Load the favorite's relay ID (or keep the current one)
-      if (fav.relayId.isNotEmpty) {
-        await ref.read(prefsProvider).setString(kPrefsRelayId, fav.relayId);
-        ref.invalidate(relayIdProvider);
-      }
     }
 
     return Scaffold(
@@ -126,14 +119,12 @@ class ConnectScreen extends HookConsumerWidget {
             icon: Icon(Icons.star),
             tooltip: 'Favorites',
             onPressed: () async {
-              final currentRelayId = ref.read(relayIdProvider).value?.relayId ?? '';
               final fav = await Navigator.push<Favorite>(
                 context,
                 MaterialPageRoute(
                   builder: (_) => FavoritesScreen(
                     currentBrokerUrl: brokerUrlTextController.text,
                     currentDiscoveryPublicKey: discoveryPublicKeyTextController.text,
-                    currentRelayId: currentRelayId,
                   ),
                 ),
               );

@@ -17,7 +17,6 @@ sealed class Favorite with _$Favorite {
     required String name,
     required String brokerUrl,
     @Default('') String discoveryPublicKey,
-    @Default('') String relayId,
   }) = _Favorite;
 
   factory Favorite.fromJson(Map<String, dynamic> json) => _$FavoriteFromJson(json);
@@ -50,13 +49,12 @@ class FavoritesList extends _$FavoritesList {
     required String name,
     required String brokerUrl,
     required String discoveryPublicKey,
-    required String relayId,
   }) async {
     final prefs = ref.read(prefsProvider);
     final current = await future;
     final entries = List<Favorite>.from(current);
     final id = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
-    entries.insert(0, Favorite(id: id, name: name, brokerUrl: brokerUrl, discoveryPublicKey: discoveryPublicKey, relayId: relayId));
+    entries.insert(0, Favorite(id: id, name: name, brokerUrl: brokerUrl, discoveryPublicKey: discoveryPublicKey));
     await _save(prefs, entries);
   }
 

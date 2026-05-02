@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Favorite {
 
- String get id; String get name; String get brokerUrl; String get discoveryPublicKey; String get relayId;
+ String get id; String get name; String get brokerUrl; String get discoveryPublicKey;
 /// Create a copy of Favorite
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FavoriteCopyWith<Favorite> get copyWith => _$FavoriteCopyWithImpl<Favorite>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Favorite&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brokerUrl, brokerUrl) || other.brokerUrl == brokerUrl)&&(identical(other.discoveryPublicKey, discoveryPublicKey) || other.discoveryPublicKey == discoveryPublicKey)&&(identical(other.relayId, relayId) || other.relayId == relayId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Favorite&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brokerUrl, brokerUrl) || other.brokerUrl == brokerUrl)&&(identical(other.discoveryPublicKey, discoveryPublicKey) || other.discoveryPublicKey == discoveryPublicKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,brokerUrl,discoveryPublicKey,relayId);
+int get hashCode => Object.hash(runtimeType,id,name,brokerUrl,discoveryPublicKey);
 
 @override
 String toString() {
-  return 'Favorite(id: $id, name: $name, brokerUrl: $brokerUrl, discoveryPublicKey: $discoveryPublicKey, relayId: $relayId)';
+  return 'Favorite(id: $id, name: $name, brokerUrl: $brokerUrl, discoveryPublicKey: $discoveryPublicKey)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FavoriteCopyWith<$Res>  {
   factory $FavoriteCopyWith(Favorite value, $Res Function(Favorite) _then) = _$FavoriteCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String brokerUrl, String discoveryPublicKey, String relayId
+ String id, String name, String brokerUrl, String discoveryPublicKey
 });
 
 
@@ -65,13 +65,12 @@ class _$FavoriteCopyWithImpl<$Res>
 
 /// Create a copy of Favorite
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? brokerUrl = null,Object? discoveryPublicKey = null,Object? relayId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? brokerUrl = null,Object? discoveryPublicKey = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,brokerUrl: null == brokerUrl ? _self.brokerUrl : brokerUrl // ignore: cast_nullable_to_non_nullable
 as String,discoveryPublicKey: null == discoveryPublicKey ? _self.discoveryPublicKey : discoveryPublicKey // ignore: cast_nullable_to_non_nullable
-as String,relayId: null == relayId ? _self.relayId : relayId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -154,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey,  String relayId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Favorite() when $default != null:
-return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_that.relayId);case _:
+return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey);case _:
   return orElse();
 
 }
@@ -175,10 +174,10 @@ return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey,  String relayId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey)  $default,) {final _that = this;
 switch (_that) {
 case _Favorite():
-return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_that.relayId);}
+return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +191,10 @@ return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey,  String relayId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String brokerUrl,  String discoveryPublicKey)?  $default,) {final _that = this;
 switch (_that) {
 case _Favorite() when $default != null:
-return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_that.relayId);case _:
+return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey);case _:
   return null;
 
 }
@@ -207,14 +206,13 @@ return $default(_that.id,_that.name,_that.brokerUrl,_that.discoveryPublicKey,_th
 @JsonSerializable()
 
 class _Favorite implements Favorite {
-  const _Favorite({required this.id, required this.name, required this.brokerUrl, this.discoveryPublicKey = '', this.relayId = ''});
+  const _Favorite({required this.id, required this.name, required this.brokerUrl, this.discoveryPublicKey = ''});
   factory _Favorite.fromJson(Map<String, dynamic> json) => _$FavoriteFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String brokerUrl;
 @override@JsonKey() final  String discoveryPublicKey;
-@override@JsonKey() final  String relayId;
 
 /// Create a copy of Favorite
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +227,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Favorite&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brokerUrl, brokerUrl) || other.brokerUrl == brokerUrl)&&(identical(other.discoveryPublicKey, discoveryPublicKey) || other.discoveryPublicKey == discoveryPublicKey)&&(identical(other.relayId, relayId) || other.relayId == relayId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Favorite&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.brokerUrl, brokerUrl) || other.brokerUrl == brokerUrl)&&(identical(other.discoveryPublicKey, discoveryPublicKey) || other.discoveryPublicKey == discoveryPublicKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,brokerUrl,discoveryPublicKey,relayId);
+int get hashCode => Object.hash(runtimeType,id,name,brokerUrl,discoveryPublicKey);
 
 @override
 String toString() {
-  return 'Favorite(id: $id, name: $name, brokerUrl: $brokerUrl, discoveryPublicKey: $discoveryPublicKey, relayId: $relayId)';
+  return 'Favorite(id: $id, name: $name, brokerUrl: $brokerUrl, discoveryPublicKey: $discoveryPublicKey)';
 }
 
 
@@ -249,7 +247,7 @@ abstract mixin class _$FavoriteCopyWith<$Res> implements $FavoriteCopyWith<$Res>
   factory _$FavoriteCopyWith(_Favorite value, $Res Function(_Favorite) _then) = __$FavoriteCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String brokerUrl, String discoveryPublicKey, String relayId
+ String id, String name, String brokerUrl, String discoveryPublicKey
 });
 
 
@@ -266,13 +264,12 @@ class __$FavoriteCopyWithImpl<$Res>
 
 /// Create a copy of Favorite
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? brokerUrl = null,Object? discoveryPublicKey = null,Object? relayId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? brokerUrl = null,Object? discoveryPublicKey = null,}) {
   return _then(_Favorite(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,brokerUrl: null == brokerUrl ? _self.brokerUrl : brokerUrl // ignore: cast_nullable_to_non_nullable
 as String,discoveryPublicKey: null == discoveryPublicKey ? _self.discoveryPublicKey : discoveryPublicKey // ignore: cast_nullable_to_non_nullable
-as String,relayId: null == relayId ? _self.relayId : relayId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

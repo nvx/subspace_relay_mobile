@@ -11,7 +11,6 @@ _Favorite _$FavoriteFromJson(Map<String, dynamic> json) => _Favorite(
   name: json['name'] as String,
   brokerUrl: json['brokerUrl'] as String,
   discoveryPublicKey: json['discoveryPublicKey'] as String? ?? '',
-  relayId: json['relayId'] as String? ?? '',
 );
 
 Map<String, dynamic> _$FavoriteToJson(_Favorite instance) => <String, dynamic>{
@@ -19,7 +18,6 @@ Map<String, dynamic> _$FavoriteToJson(_Favorite instance) => <String, dynamic>{
   'name': instance.name,
   'brokerUrl': instance.brokerUrl,
   'discoveryPublicKey': instance.discoveryPublicKey,
-  'relayId': instance.relayId,
 };
 
 // **************************************************************************
@@ -53,7 +51,7 @@ final class FavoritesListProvider
   FavoritesList create() => FavoritesList();
 }
 
-String _$favoritesListHash() => r'ad71ae33bc61b40c7784bca2c76205e8d847281c';
+String _$favoritesListHash() => r'd1b0cd4bc782e341a912efac45db86baf869f94e';
 
 abstract class _$FavoritesList extends $AsyncNotifier<List<Favorite>> {
   FutureOr<List<Favorite>> build();
