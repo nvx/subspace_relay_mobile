@@ -1,5 +1,4 @@
 import 'package:convert/convert.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -9,7 +8,6 @@ import 'package:subspace_relay_mobile/connection_mode.dart';
 import 'package:subspace_relay_mobile/favorites_screen.dart';
 import 'package:subspace_relay_mobile/history_screen.dart';
 import 'package:subspace_relay_mobile/util.dart';
-import 'package:subspace_relay_mobile/hooks.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
 import 'package:subspace_relay_mobile/services/favorites.dart';
 import 'package:subspace_relay_mobile/services/history.dart';
@@ -74,14 +72,26 @@ class ConnectScreen extends HookConsumerWidget {
       return null;
     }, [key]);
 
-    useRouteObserver(
-      routeObserver,
-      didPopNext: () {
-        if (kDebugMode) {
-          print('didPopNext');
+    // Keep the text fields in sync when the broker / discovery key are changed
+    // externally — e.g. a deep link scanned while this screen is backgrounded, or
+    // a favorite being loaded. User edits only ever live in the controllers (they
+    // aren't written back to the providers until connect), so syncing here never
+    // clobbers in-progress typing.
+    ref.listen(brokerUrlProvider, (previous, next) {
+      if (next.hasValue && brokerUrlTextController.text != next.value.toString()) {
+        brokerUrlTextController.text = next.value.toString();
+        updateValidChecks();
+      }
+    });
+    ref.listen(discoveryPublicKeyProvider, (previous, next) {
+      if (next.hasValue) {
+        final encoded = hex.encode(next.value!).toUpperCase();
+        if (discoveryPublicKeyTextController.text != encoded) {
+          discoveryPublicKeyTextController.text = encoded;
+          updateValidChecks();
         }
-      },
-    );
+      }
+    });
 
     Future<void> connect(ConnectionMode mode) async {
       final dkText = discoveryPublicKeyTextController.text;
