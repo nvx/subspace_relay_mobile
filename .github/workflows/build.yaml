@@ -29,6 +29,18 @@ jobs:
         with:
           channel: stable
           cache: true
+          pub-cache: true
+
+      - name: Cache Android SDK Components
+        uses: actions/cache@v5
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/cmake
+          key: ${{ runner.os }}-android-sdk-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('**/build.gradle*', '**/app/build.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
 
       - name: Setup Android signing key
         if: ${{ github.ref_name == 'main' }}
