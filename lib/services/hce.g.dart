@@ -46,7 +46,7 @@ abstract class _$HceActive extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -56,7 +56,7 @@ abstract class _$HceActive extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -90,7 +90,7 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
   FutureOr<Stream<Uint8List?>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<Stream<Uint8List?>>, Stream<Uint8List?>>;
     final element =
@@ -101,7 +101,7 @@ abstract class _$Hce extends $AsyncNotifier<Stream<Uint8List?>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -135,7 +135,7 @@ abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
   FutureOr<HceRelayState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<HceRelayState>, HceRelayState>;
     final element =
         ref.element
@@ -145,6 +145,6 @@ abstract class _$HceRelay extends $AsyncNotifier<HceRelayState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

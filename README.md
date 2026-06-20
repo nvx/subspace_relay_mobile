@@ -1,5 +1,7 @@
 # Subspace Relay Mobile
 
+<a href="https://play.google.com/store/apps/details?id=io.nv.subspacerelay.mobile" alt="Get it on Google Play"><img src="https://raw.githubusercontent.com/pioug/google-play-badges/refs/heads/main/svg/en.svg" height="70"></a>
+
 Mobile app that implements a [Subspace Relay](https://github.com/nvx/subspace-relay) on Android.
 
 Currently supports relay mode with Android HCE and as a reader.

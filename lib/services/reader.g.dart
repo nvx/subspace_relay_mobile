@@ -38,7 +38,7 @@ abstract class _$Reader extends $AsyncNotifier<NfcTag?> {
   FutureOr<NfcTag?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<NfcTag?>, NfcTag?>;
     final element =
         ref.element
@@ -48,7 +48,7 @@ abstract class _$Reader extends $AsyncNotifier<NfcTag?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -127,7 +127,7 @@ abstract class _$ReaderRelay extends $AsyncNotifier<ReaderRelayState?> {
   FutureOr<ReaderRelayState?> build(bool dynamicRelayId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<ReaderRelayState?>, ReaderRelayState?>;
     final element =
@@ -138,6 +138,6 @@ abstract class _$ReaderRelay extends $AsyncNotifier<ReaderRelayState?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

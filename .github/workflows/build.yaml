@@ -21,7 +21,7 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.base.repo.full_name != github.event.pull_request.head.repo.full_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -29,6 +29,17 @@ jobs:
         with:
           channel: stable
           cache: true
+          pub-cache: true
+
+      - name: Cache Android SDK Components
+        uses: actions/cache@v5
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/27.0.12077973
+            /usr/local/lib/android/sdk/cmake/3.22.1
+          key: ${{ runner.os }}-android-sdk-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('**/build.gradle*', '**/app/build.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
 
       - name: Setup Android signing key
         if: ${{ github.ref_name == 'main' }}
@@ -63,14 +74,14 @@ jobs:
           flutter build apk --debug --build-number="${{ github.run_number }}" --build-name="${{ env.BUILD_NAME }}"
 
       - name: Archive App Bundle
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: "subspace_relay_mobile_aab_release_v${{ env.BUILD_NAME }}"
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
       - name: Archive APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: "subspace_relay_mobile_apk_debug_v${{ env.BUILD_NAME }}"
           path: build/app/outputs/flutter-apk/app-debug.apk
@@ -78,7 +89,7 @@ jobs:
 
       - name: Authenticate to GCP
         if: ${{ github.ref_name == 'main' }}
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v3
         id: auth
         with:
           service_account: '${{ vars.GCP_SERVICE_ACCOUNT }}'
@@ -93,5 +104,5 @@ jobs:
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           packageName: io.nv.subspacerelay.mobile
           releaseName: "${{ env.BUILD_NAME }}"
-          track: internal
+          tracks: internal
           status: draft

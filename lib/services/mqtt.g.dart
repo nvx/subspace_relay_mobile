@@ -38,7 +38,7 @@ abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
   FutureOr<Uri> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<Uri>, Uri>;
     final element =
         ref.element
@@ -48,7 +48,7 @@ abstract class _$BrokerUrl extends $AsyncNotifier<Uri> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -93,7 +93,7 @@ final class MqttProvider
   }
 }
 
-String _$mqttHash() => r'6553325b4d5fb0b032bde760277d0a837911519a';
+String _$mqttHash() => r'3634f4d4efd02de73a12c7ecab4845b74af41ad9';
 
 final class MqttFamily extends $Family
     with
@@ -127,7 +127,7 @@ abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
   FutureOr<Stream<RelayMessage>> build(RelayId relayId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<Stream<RelayMessage>>, Stream<RelayMessage>>;
@@ -142,6 +142,6 @@ abstract class _$Mqtt extends $AsyncNotifier<Stream<RelayMessage>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

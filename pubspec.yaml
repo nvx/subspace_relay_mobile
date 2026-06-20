@@ -13,26 +13,22 @@ dependencies:
   cupertino_icons: ^1.0.8
   async: ^2.13.0
   plugin_platform_interface: ^2.1.8
-  hooks_riverpod: ^3.1.0
-  flutter_hooks: ^0.21.2
-  riverpod_annotation: ^4.0.0
+  hooks_riverpod: ^3.3.2
+  flutter_hooks: ^0.21.3
+  riverpod_annotation: ^4.0.3
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   shared_preferences: ^2.5.3
-  package_info_plus: ^9.0.0
-  app_links: ^6.4.1
+  package_info_plus: ^10.1.0
+  app_links: ^7.1.2
 
-  subspace_relay_pb: ^1.0.7
-  protobuf: ^5.0.0
+  subspace_relay_pb: ^1.0.11
+  protobuf: ^6.0.0
   mqtt5_client: ^4.14.0
   uuid: ^4.5.1
-  cryptography_plus: ^2.7.1
-  cryptography_flutter_plus: ^2.3.4
-  nfc_manager:
-    # PR https://github.com/okadan/flutter-nfc-manager/pull/263 fixes https://github.com/okadan/flutter-nfc-manager/issues/252
-    git:
-      url: https://github.com/okadan/flutter-nfc-manager.git
-      ref: 95bfd8750207b2bcecfbf9bedb7055e4916db06a
+  cryptography_plus: ^3.0.0
+  cryptography_flutter_plus: ^3.0.0
+  nfc_manager: ^4.2.1
 
   convert: ^3.1.2
   typed_data: ^1.4.0
@@ -44,10 +40,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  riverpod_generator: ^4.0.0
+  riverpod_generator: ^4.0.4
   build_runner: ^2.5.4
-  custom_lint: ^0.8.0
-  riverpod_lint: ^3.0.0
+  riverpod_lint: ^3.1.4
   freezed: ^3.1.0
   json_serializable: ^6.9.4
 
