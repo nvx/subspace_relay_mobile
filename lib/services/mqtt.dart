@@ -155,7 +155,7 @@ class Mqtt extends _$Mqtt {
         if (kDebugMode) {
           print('Sending disconnect');
         }
-        await sendReply($pb.Message(disconnect: $pb.Empty.create()), null);
+        await sendReply($pb.Message(disconnect: $pb.Disconnect.create()), null);
       }
       _client.disconnect();
     });

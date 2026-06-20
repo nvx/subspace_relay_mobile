@@ -31,8 +31,6 @@ formatter:
   page_width: 160
 
 analyzer:
-  plugins:
-    - custom_lint
   exclude:
     - '**.freezed.dart'
     - '**.g.dart'
