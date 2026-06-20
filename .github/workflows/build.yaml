@@ -63,14 +63,14 @@ jobs:
           flutter build apk --debug --build-number="${{ github.run_number }}" --build-name="${{ env.BUILD_NAME }}"
 
       - name: Archive App Bundle
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: "subspace_relay_mobile_aab_release_v${{ env.BUILD_NAME }}"
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
       - name: Archive APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: "subspace_relay_mobile_apk_debug_v${{ env.BUILD_NAME }}"
           path: build/app/outputs/flutter-apk/app-debug.apk
