@@ -35,9 +35,8 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            /usr/local/lib/android/sdk/ndk
-            /usr/local/lib/android/sdk/platforms
-            /usr/local/lib/android/sdk/cmake
+            /usr/local/lib/android/sdk/ndk/27.0.12077973
+            /usr/local/lib/android/sdk/cmake/3.22.1
           key: ${{ runner.os }}-android-sdk-${{ steps.flutter-action.outputs.VERSION }}-${{ hashFiles('**/build.gradle*', '**/app/build.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-android-sdk-
