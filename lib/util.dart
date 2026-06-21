@@ -23,7 +23,7 @@ class UpperCaseTextFormatter extends TextInputFormatter {
 class RelayIdWidget extends StatelessWidget {
   final String text;
   final String _relayId;
-  const RelayIdWidget(this._relayId, {this.text = 'RelayID', super.key});
+  const RelayIdWidget(this._relayId, {super.key, this.text = 'RelayID'});
 
   @override
   Widget build(BuildContext context) {

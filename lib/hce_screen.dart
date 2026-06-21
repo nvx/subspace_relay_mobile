@@ -10,7 +10,7 @@ import 'package:subspace_relay_mobile/services/relay_id.dart';
 
 class HceRelayScreen extends HookConsumerWidget {
   final String? historyId;
-  const HceRelayScreen({this.historyId, super.key});
+  const HceRelayScreen({super.key, this.historyId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

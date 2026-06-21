@@ -29,7 +29,7 @@ class ReaderRelayCardInfo extends HookConsumerWidget {
 class ReaderRelayScreen extends HookConsumerWidget {
   final bool _dynamicRelayId;
   final String? historyId;
-  const ReaderRelayScreen(this._dynamicRelayId, {this.historyId, super.key});
+  const ReaderRelayScreen(this._dynamicRelayId, {super.key, this.historyId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

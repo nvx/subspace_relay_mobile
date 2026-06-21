@@ -9,10 +9,10 @@ class FavoritesScreen extends HookConsumerWidget {
   final String currentName;
 
   const FavoritesScreen({
+    super.key,
     this.currentBrokerUrl = '',
     this.currentDiscoveryPublicKey = '',
     this.currentName = '',
-    super.key,
   });
 
   @override
