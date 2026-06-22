@@ -1,15 +1,16 @@
 import 'package:convert/convert.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:subspace_relay_mobile/hce_screen.dart';
-import 'package:subspace_relay_mobile/reader_screen.dart';
+import 'package:subspace_relay_mobile/connection_mode.dart';
+import 'package:subspace_relay_mobile/favorites_screen.dart';
+import 'package:subspace_relay_mobile/history_screen.dart';
 import 'package:subspace_relay_mobile/util.dart';
-import 'package:subspace_relay_mobile/hooks.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
+import 'package:subspace_relay_mobile/services/favorites.dart';
+import 'package:subspace_relay_mobile/services/history.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
 import 'package:subspace_relay_mobile/services/relay_id.dart';
 
@@ -47,6 +48,8 @@ class ConnectScreen extends HookConsumerWidget {
       isBrokerValid.value = ['mqtt', 'mqtts', 'ws', 'wss'].contains(parsedUri.scheme) && parsedUri.host.isNotEmpty;
     }
 
+    // Populate text controllers from providers exactly once on initial load.
+    // After this, text controllers are the source of truth — never overwritten by providers.
     if (!initialValueLoaded.value && brokerUrl.hasValue && discoveryPublicKey.hasValue) {
       initialValueLoaded.value = true;
       brokerUrlTextController.text = brokerUrl.value.toString();
@@ -69,26 +72,86 @@ class ConnectScreen extends HookConsumerWidget {
       return null;
     }, [key]);
 
-    useRouteObserver(
-      routeObserver,
-      didPopNext: () {
-        if (kDebugMode) {
-          print('didPopNext');
+    // Keep the text fields in sync when the broker / discovery key are changed
+    // externally — e.g. a deep link scanned while this screen is backgrounded, or
+    // a favorite being loaded. User edits only ever live in the controllers (they
+    // aren't written back to the providers until connect), so syncing here never
+    // clobbers in-progress typing.
+    ref.listen(brokerUrlProvider, (previous, next) {
+      if (next.hasValue && brokerUrlTextController.text != next.value.toString()) {
+        brokerUrlTextController.text = next.value.toString();
+        updateValidChecks();
+      }
+    });
+    ref.listen(discoveryPublicKeyProvider, (previous, next) {
+      if (next.hasValue) {
+        final encoded = hex.encode(next.value!).toUpperCase();
+        if (discoveryPublicKeyTextController.text != encoded) {
+          discoveryPublicKeyTextController.text = encoded;
+          updateValidChecks();
         }
-        initialValueLoaded.value = false;
-      },
-    );
+      }
+    });
 
-    connect(WidgetBuilder builder) async {
-      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(discoveryPublicKeyTextController.text));
+    Future<void> connect(ConnectionMode mode) async {
+      final dkText = discoveryPublicKeyTextController.text;
+      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(dkText));
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text);
+      // Resolve the relay ID before recording history so the entry has the value used for the connection.
+      final resolvedRelayId = await ref.read(relayIdProvider.future);
+      final historyId = await ref.read(connectionHistoryProvider.notifier).add(
+            brokerUrl: brokerUrlTextController.text,
+            discoveryPublicKey: dkText,
+            relayId: resolvedRelayId.relayId,
+            mode: mode,
+          );
       if (context.mounted) {
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: builder), ModalRoute.withName('/'));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
       }
     }
 
+    Future<void> loadFavorite(Favorite fav) async {
+      brokerUrlTextController.text = fav.brokerUrl;
+      discoveryPublicKeyTextController.text = fav.discoveryPublicKey;
+      updateValidChecks();
+
+      // Sync providers to match the favorite
+      await ref.read(discoveryPublicKeyProvider.notifier).updatePublicKey(hex.decode(fav.discoveryPublicKey));
+      await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(fav.brokerUrl);
+    }
+
     return Scaffold(
-      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text('Subspace Relay')),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Subspace Relay'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.star),
+            tooltip: 'Favorites',
+            onPressed: () async {
+              final fav = await Navigator.push<Favorite>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FavoritesScreen(
+                    currentBrokerUrl: brokerUrlTextController.text,
+                    currentDiscoveryPublicKey: discoveryPublicKeyTextController.text,
+                  ),
+                ),
+              );
+              if (fav != null) {
+                await loadFavorite(fav);
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.history),
+            tooltip: 'History',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => HistoryScreen()));
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -135,10 +198,14 @@ class ConnectScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
-              ElevatedButton(onPressed: !readyToConnect ? null : () => connect((context) => HceRelayScreen()), child: const Text("Start HCE")),
-              ElevatedButton(onPressed: !readyToConnect ? null : () => connect((context) => ReaderRelayScreen(false)), child: const Text("Start Reader")),
               ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect((context) => ReaderRelayScreen(true)),
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.hce), 
+                child: const Text("Start HCE")),
+              ElevatedButton(
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.reader), 
+                child: const Text("Start Reader")),
+              ElevatedButton(
+                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.readerDynamic),
                 child: const Text("Start Reader (Dynamic)"),
               ),
             ],

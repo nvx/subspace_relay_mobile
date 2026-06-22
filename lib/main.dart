@@ -7,11 +7,12 @@ import 'package:hooks_riverpod/misc.dart';
 import 'package:app_links/app_links.dart';
 
 import 'package:subspace_relay_mobile/connect_screen.dart';
-import 'package:subspace_relay_mobile/hce_screen.dart';
-import 'package:subspace_relay_mobile/reader_screen.dart';
+import 'package:subspace_relay_mobile/connection_mode.dart';
 import 'package:subspace_relay_mobile/util.dart';
 import 'package:subspace_relay_mobile/services/discovery.dart';
+import 'package:subspace_relay_mobile/services/history.dart';
 import 'package:subspace_relay_mobile/services/mqtt.dart';
+import 'package:subspace_relay_mobile/services/relay_id.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +55,9 @@ class MyApp extends HookConsumerWidget {
         params.remove('path');
         params.remove('discovery');
 
+        final deepLinkName = uri.queryParameters['name'];
+        params.remove('name');
+
         final brokerUrl = Uri(
           scheme: scheme,
           userInfo: uri.userInfo,
@@ -86,17 +90,26 @@ class MyApp extends HookConsumerWidget {
           return;
         }
 
-        connect(WidgetBuilder builder) {
-          navigatorKey.currentState?.pushAndRemoveUntil(MaterialPageRoute(builder: builder), ModalRoute.withName('/'));
+        Future<void> connect(ConnectionMode mode) async {
+          final currentRelayId = (await ref.read(relayIdProvider.future)).relayId;
+          final historyId = await ref.read(connectionHistoryProvider.notifier).add(
+                brokerUrl: brokerUrl.toString(),
+                discoveryPublicKey: pubKey ?? '',
+                relayId: currentRelayId,
+                mode: mode,
+                name: deepLinkName,
+              );
+          if (!context.mounted) return;
+          navigatorKey.currentState?.pushAndRemoveUntil(MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
         }
 
         switch (uri.path) {
           case '/card':
-            connect((context) => HceRelayScreen());
+            await connect(ConnectionMode.hce);
           case '/reader':
-            connect((context) => ReaderRelayScreen(false));
+            await connect(ConnectionMode.reader);
           case '/reader-dynamic':
-            connect((context) => ReaderRelayScreen(true));
+            await connect(ConnectionMode.readerDynamic);
         }
       });
       return subscription.cancel;
