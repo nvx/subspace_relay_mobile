@@ -68,15 +68,10 @@ class ConnectionHistory extends _$ConnectionHistory {
     final id = now.millisecondsSinceEpoch.toRadixString(36);
     final displayName = name ?? Uri.tryParse(brokerUrl)?.host ?? brokerUrl;
 
-    entries.insert(0, HistoryEntry(
-      id: id,
-      name: displayName,
-      brokerUrl: brokerUrl,
-      discoveryPublicKey: discoveryPublicKey,
-      relayId: relayId,
-      mode: mode,
-      timestamp: now,
-    ));
+    entries.insert(
+      0,
+      HistoryEntry(id: id, name: displayName, brokerUrl: brokerUrl, discoveryPublicKey: discoveryPublicKey, relayId: relayId, mode: mode, timestamp: now),
+    );
 
     // Keep max 50 entries
     if (entries.length > 50) entries.removeRange(50, entries.length);

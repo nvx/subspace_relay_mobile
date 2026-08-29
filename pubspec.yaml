@@ -10,25 +10,33 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
   async: ^2.13.0
-  plugin_platform_interface: ^2.1.8
   hooks_riverpod: ^3.3.2
   flutter_hooks: ^0.21.3
   riverpod_annotation: ^4.0.3
   freezed_annotation: ^3.1.0
-  json_annotation: ^4.9.0
+  json_annotation: ^4.12.0
   shared_preferences: ^2.5.3
   package_info_plus: ^10.1.0
   app_links: ^7.1.2
 
-  subspace_relay_pb: ^1.0.11
-  protobuf: ^6.0.0
-  mqtt5_client: ^4.14.0
+  subspace_relay_pb: ^1.0.12
+  mqtt5_client: ^5.0.0
   uuid: ^4.5.1
-  cryptography_plus: ^3.0.0
-  cryptography_flutter_plus: ^3.0.0
-  nfc_manager: ^4.2.1
+  cryptography_plus:
+    git:
+      url: https://github.com/emz-hanauer/dart-cryptography.git
+      path: pkgs/cryptography_plus
+      ref: 0d209e92588ddf102450e125d9603f5e128b0146 # https://github.com/emz-hanauer/dart-cryptography/pull/27 for AGP 9 support
+  cryptography_flutter_plus:
+    git:
+      url: https://github.com/emz-hanauer/dart-cryptography.git
+      path: pkgs/cryptography_flutter_plus
+      ref: 0d209e92588ddf102450e125d9603f5e128b0146 # https://github.com/emz-hanauer/dart-cryptography/pull/27 for AGP 9 support
+  nfc_manager:
+    git:
+      url: https://github.com/okadan/flutter-nfc-manager.git
+      ref: 9df848c24a3e184f735de21127d62981e796f581 # https://github.com/okadan/flutter-nfc-manager/pull/277 for AGP 9 support
 
   convert: ^3.1.2
   typed_data: ^1.4.0
@@ -36,14 +44,20 @@ dependencies:
   vibration: ^3.1.4
   intl: ^0.20.2
 
+dependency_overrides:
+  cryptography_plus:
+    git:
+      url: https://github.com/emz-hanauer/dart-cryptography.git
+      path: pkgs/cryptography_plus
+      ref: 0d209e92588ddf102450e125d9603f5e128b0146 # https://github.com/emz-hanauer/dart-cryptography/pull/27 for AGP 9 support
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   riverpod_generator: ^4.0.4
   build_runner: ^2.5.4
-  riverpod_lint: ^3.1.4
-  freezed: ^3.1.0
+  freezed: ^4.0.0
   json_serializable: ^6.9.4
 
 flutter:

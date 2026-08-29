@@ -67,6 +67,12 @@ class ReaderRelay extends _$ReaderRelay {
     }
 
     final nfcA = NfcAAndroid.from(reader);
+    if (nfcA != null) {
+      // TODO: Running this breaks IsoDepAndroid, needs fresh tag - reimplement IsoDep on NfcA ourselves?
+      final ret = await nfcA.transceive(Uint8List.fromList([0xE0, 0x80]));
+      print('ats: ${hex.encode(ret)}');
+    }
+
     final isoTag = IsoDepAndroid.from(reader);
 
     if (isoTag == null) {

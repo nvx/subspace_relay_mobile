@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:convert/convert.dart';
+import 'package:cryptography_flutter_plus/cryptography_flutter_plus.dart';
 import 'package:cryptography_plus/cryptography_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -34,9 +36,21 @@ class DiscoveryPublicKey extends _$DiscoveryPublicKey {
 }
 
 Future<$pb.Message> buildEncryptedRelayDiscovery(List<int> pubKey, $pb.RelayDiscovery relayDiscovery) async {
-  final wand = await X25519().newKeyExchangeWand();
-  final sharedKey = await wand.sharedSecretKey(remotePublicKey: SimplePublicKey(pubKey, type: KeyPairType.x25519));
-  final crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(SecretKey((await sharedKey.extractBytes()).sublist(0, 16)));
+  final wand = await FlutterX25519(X25519()).newKeyExchangeWand();
+  final rawSharedKey = await wand.sharedSecretKey(remotePublicKey: SimplePublicKey(pubKey, type: KeyPairType.x25519));
+
+  const pbkdfIterations = 20;
+  const pbkdfBits = 16 * 8;
+  final pbkdf2 = FlutterPbkdf2(
+    fallback: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: pbkdfIterations, bits: pbkdfBits),
+    macAlgorithm: Hmac.sha256(),
+    iterations: pbkdfIterations,
+    bits: pbkdfBits,
+  );
+
+  final sharedKey = await pbkdf2.deriveKey(secretKey: rawSharedKey, nonce: utf8.encode('discovery'));
+
+  final crypto = await FlutterAesGcm.with128bits().newCipherWandFromSecretKey(sharedKey);
 
   final encryptedRelayDiscovery = await crypto.encrypt(relayDiscovery.writeToBuffer());
 

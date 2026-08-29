@@ -99,12 +99,9 @@ class ConnectScreen extends HookConsumerWidget {
       await ref.read(brokerUrlProvider.notifier).updateBrokerUrl(brokerUrlTextController.text);
       // Resolve the relay ID before recording history so the entry has the value used for the connection.
       final resolvedRelayId = await ref.read(relayIdProvider.future);
-      final historyId = await ref.read(connectionHistoryProvider.notifier).add(
-            brokerUrl: brokerUrlTextController.text,
-            discoveryPublicKey: dkText,
-            relayId: resolvedRelayId.relayId,
-            mode: mode,
-          );
+      final historyId = await ref
+          .read(connectionHistoryProvider.notifier)
+          .add(brokerUrl: brokerUrlTextController.text, discoveryPublicKey: dkText, relayId: resolvedRelayId.relayId, mode: mode);
       if (context.mounted) {
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
       }
@@ -132,10 +129,8 @@ class ConnectScreen extends HookConsumerWidget {
               final fav = await Navigator.push<Favorite>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => FavoritesScreen(
-                    currentBrokerUrl: brokerUrlTextController.text,
-                    currentDiscoveryPublicKey: discoveryPublicKeyTextController.text,
-                  ),
+                  builder: (_) =>
+                      FavoritesScreen(currentBrokerUrl: brokerUrlTextController.text, currentDiscoveryPublicKey: discoveryPublicKeyTextController.text),
                 ),
               );
               if (fav != null) {
@@ -198,16 +193,9 @@ class ConnectScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.hce), 
-                child: const Text("Start HCE")),
-              ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.reader), 
-                child: const Text("Start Reader")),
-              ElevatedButton(
-                onPressed: !readyToConnect ? null : () => connect(ConnectionMode.readerDynamic),
-                child: const Text("Start Reader (Dynamic)"),
-              ),
+              ElevatedButton(onPressed: !readyToConnect ? null : () => connect(ConnectionMode.hce), child: const Text("Start HCE")),
+              ElevatedButton(onPressed: !readyToConnect ? null : () => connect(ConnectionMode.reader), child: const Text("Start Reader")),
+              ElevatedButton(onPressed: !readyToConnect ? null : () => connect(ConnectionMode.readerDynamic), child: const Text("Start Reader (Dynamic)")),
             ],
           ),
         ),

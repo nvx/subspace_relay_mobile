@@ -24,11 +24,19 @@ class HistoryScreen extends HookConsumerWidget {
                   return Dismissible(
                     key: Key(entry.id),
                     direction: DismissDirection.endToStart,
-                    background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: EdgeInsets.only(right: 16), child: Icon(Icons.delete, color: Colors.white)),
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
                     onDismissed: (_) => ref.read(connectionHistoryProvider.notifier).remove(entry.id),
                     child: ListTile(
                       title: Text(entry.name, overflow: TextOverflow.ellipsis),
-                      subtitle: Text('${entry.mode.displayName} · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}', style: Theme.of(context).textTheme.bodySmall),
+                      subtitle: Text(
+                        '${entry.mode.displayName} · $host\n${DateFormat('MMM d, h:mm:ss a').format(entry.timestamp)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                       isThreeLine: true,
                       trailing: entry.log.isNotEmpty ? Icon(Icons.article_outlined, size: 18) : null,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => _HistoryDetailScreen(entry: entry))),
@@ -50,10 +58,7 @@ class _HistoryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(entry.name),
-      ),
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: Text(entry.name)),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16),
@@ -94,7 +99,10 @@ class _HistoryDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text('$label:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+          SizedBox(
+            width: 100,
+            child: Text('$label:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ),
           Expanded(child: SelectableText(value, style: TextStyle(fontSize: 12))),
         ],
       ),

@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class _RouteCallbacks with RouteAware {
-  const _RouteCallbacks({
-    this.handleDidPopNext,
-    this.handleDidPush,
-    this.handleDidPop,
-    this.handleDidPushNext,
-  });
+  const _RouteCallbacks({this.handleDidPopNext, this.handleDidPush, this.handleDidPop, this.handleDidPushNext});
 
   final Function()? handleDidPopNext;
   final Function()? handleDidPush;
@@ -49,12 +44,7 @@ void useRouteObserver(
   useEffect(() {
     if (route == null) return () {};
 
-    final callbacks = _RouteCallbacks(
-      handleDidPop: didPop,
-      handleDidPopNext: didPopNext,
-      handleDidPush: didPush,
-      handleDidPushNext: didPushNext,
-    );
+    final callbacks = _RouteCallbacks(handleDidPop: didPop, handleDidPopNext: didPopNext, handleDidPush: didPush, handleDidPushNext: didPushNext);
     routeObserver.subscribe(callbacks, route);
     return () => routeObserver.unsubscribe(callbacks);
   }, [route, routeObserver, ...keys]);

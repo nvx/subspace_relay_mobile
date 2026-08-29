@@ -10,8 +10,7 @@ const pubKeyHexLength = 64;
 
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
-String formatLogEntries(Iterable<LogEntry> entries) =>
-    entries.map((e) => '[${DateFormat('HH:mm:ss').format(e.timestamp)}] ${e.message}').join('\n');
+String formatLogEntries(Iterable<LogEntry> entries) => entries.map((e) => '[${DateFormat('HH:mm:ss').format(e.timestamp)}] ${e.message}').join('\n');
 
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override

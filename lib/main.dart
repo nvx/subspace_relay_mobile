@@ -92,13 +92,9 @@ class MyApp extends HookConsumerWidget {
 
         Future<void> connect(ConnectionMode mode) async {
           final currentRelayId = (await ref.read(relayIdProvider.future)).relayId;
-          final historyId = await ref.read(connectionHistoryProvider.notifier).add(
-                brokerUrl: brokerUrl.toString(),
-                discoveryPublicKey: pubKey ?? '',
-                relayId: currentRelayId,
-                mode: mode,
-                name: deepLinkName,
-              );
+          final historyId = await ref
+              .read(connectionHistoryProvider.notifier)
+              .add(brokerUrl: brokerUrl.toString(), discoveryPublicKey: pubKey ?? '', relayId: currentRelayId, mode: mode, name: deepLinkName);
           if (!context.mounted) return;
           navigatorKey.currentState?.pushAndRemoveUntil(MaterialPageRoute(builder: widgetBuilderForMode(mode, historyId: historyId)), ModalRoute.withName('/'));
         }

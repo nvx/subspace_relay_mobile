@@ -12,12 +12,7 @@ const kPrefsFavorites = 'favorites';
 
 @freezed
 sealed class Favorite with _$Favorite {
-  const factory Favorite({
-    required String id,
-    required String name,
-    required String brokerUrl,
-    @Default('') String discoveryPublicKey,
-  }) = _Favorite;
+  const factory Favorite({required String id, required String name, required String brokerUrl, @Default('') String discoveryPublicKey}) = _Favorite;
 
   factory Favorite.fromJson(Map<String, dynamic> json) => _$FavoriteFromJson(json);
 }
@@ -45,11 +40,7 @@ class FavoritesList extends _$FavoritesList {
     }
   }
 
-  Future<void> add({
-    required String name,
-    required String brokerUrl,
-    required String discoveryPublicKey,
-  }) async {
+  Future<void> add({required String name, required String brokerUrl, required String discoveryPublicKey}) async {
     final prefs = ref.read(prefsProvider);
     final current = await future;
     final entries = List<Favorite>.from(current);

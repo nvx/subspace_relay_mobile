@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:convert/convert.dart';
+import 'package:cryptography_flutter_plus/cryptography_flutter_plus.dart';
 import 'package:cryptography_plus/cryptography_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -88,7 +89,7 @@ class Mqtt extends _$Mqtt {
     _publishBroadcastTopic = _topicBroadcastFromRelay;
     _subscribeBroadcastTopic = _topicBroadcastToRelay;
 
-    _crypto = await AesGcm.with128bits().newCipherWandFromSecretKey(relayId.cryptoKey);
+    _crypto = await FlutterAesGcm.with128bits().newCipherWandFromSecretKey(relayId.cryptoKey);
 
     final brokerUrl = await ref.watch(brokerUrlProvider.future);
 
@@ -165,7 +166,12 @@ class Mqtt extends _$Mqtt {
     _client.subscribe(_subscribeTopic, MqttQos.exactlyOnce);
     _client.subscribe(_subscribeBroadcastTopic, MqttQos.exactlyOnce);
 
-    final subscription = _client.updates.listen(_onData);
+    final updates = _client.updates;
+    if (updates == null) {
+      throw 'unable to get subscription updates';
+    }
+
+    final subscription = updates.listen(_onData);
     ref.onDispose(subscription.cancel);
 
     if (kDebugMode) {

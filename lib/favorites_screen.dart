@@ -8,12 +8,7 @@ class FavoritesScreen extends HookConsumerWidget {
   final String currentDiscoveryPublicKey;
   final String currentName;
 
-  const FavoritesScreen({
-    super.key,
-    this.currentBrokerUrl = '',
-    this.currentDiscoveryPublicKey = '',
-    this.currentName = '',
-  });
+  const FavoritesScreen({super.key, this.currentBrokerUrl = '', this.currentDiscoveryPublicKey = '', this.currentName = ''});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,13 +18,7 @@ class FavoritesScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Favorites'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            tooltip: 'Add favorite',
-            onPressed: () => _showAddDialog(context, ref),
-          ),
-        ],
+        actions: [IconButton(icon: Icon(Icons.add), tooltip: 'Add favorite', onPressed: () => _showAddDialog(context, ref))],
       ),
       body: favorites.when(
         data: (entries) => entries.isEmpty
@@ -41,16 +30,18 @@ class FavoritesScreen extends HookConsumerWidget {
                   return Dismissible(
                     key: Key(entry.id),
                     direction: DismissDirection.endToStart,
-                    background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: EdgeInsets.only(right: 16), child: Icon(Icons.delete, color: Colors.white)),
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
                     onDismissed: (_) => ref.read(favoritesListProvider.notifier).remove(entry.id),
                     child: ListTile(
                       leading: Icon(Icons.star, color: Colors.amber),
                       title: Text(entry.name, overflow: TextOverflow.ellipsis),
                       subtitle: Text(Uri.tryParse(entry.brokerUrl)?.host ?? entry.brokerUrl, style: Theme.of(context).textTheme.bodySmall),
-                      trailing: IconButton(
-                        icon: Icon(Icons.edit, size: 20),
-                        onPressed: () => _showEditDialog(context, ref, entry),
-                      ),
+                      trailing: IconButton(icon: Icon(Icons.edit, size: 20), onPressed: () => _showEditDialog(context, ref, entry)),
                       onTap: () => Navigator.pop(context, entry),
                     ),
                   );
@@ -77,11 +68,21 @@ class FavoritesScreen extends HookConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: nameTextController, autofocus: true, decoration: InputDecoration(labelText: 'Name')),
+                TextField(
+                  controller: nameTextController,
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: 'Name'),
+                ),
                 SizedBox(height: 8),
-                TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
+                TextField(
+                  controller: brokerTextController,
+                  decoration: InputDecoration(labelText: 'Broker URL'),
+                ),
                 SizedBox(height: 8),
-                TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+                TextField(
+                  controller: discoveryTextController,
+                  decoration: InputDecoration(labelText: 'Discovery Public Key'),
+                ),
               ],
             ),
           ),
@@ -93,11 +94,9 @@ class FavoritesScreen extends HookConsumerWidget {
       );
 
       if (result == true && nameTextController.text.isNotEmpty) {
-        await ref.read(favoritesListProvider.notifier).add(
-              name: nameTextController.text,
-              brokerUrl: brokerTextController.text,
-              discoveryPublicKey: discoveryTextController.text,
-            );
+        await ref
+            .read(favoritesListProvider.notifier)
+            .add(name: nameTextController.text, brokerUrl: brokerTextController.text, discoveryPublicKey: discoveryTextController.text);
       }
     } finally {
       nameTextController.dispose();
@@ -120,11 +119,20 @@ class FavoritesScreen extends HookConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: nameTextController, decoration: InputDecoration(labelText: 'Name')),
+                TextField(
+                  controller: nameTextController,
+                  decoration: InputDecoration(labelText: 'Name'),
+                ),
                 SizedBox(height: 8),
-                TextField(controller: brokerTextController, decoration: InputDecoration(labelText: 'Broker URL')),
+                TextField(
+                  controller: brokerTextController,
+                  decoration: InputDecoration(labelText: 'Broker URL'),
+                ),
                 SizedBox(height: 8),
-                TextField(controller: discoveryTextController, decoration: InputDecoration(labelText: 'Discovery Public Key')),
+                TextField(
+                  controller: discoveryTextController,
+                  decoration: InputDecoration(labelText: 'Discovery Public Key'),
+                ),
               ],
             ),
           ),
@@ -136,7 +144,9 @@ class FavoritesScreen extends HookConsumerWidget {
       );
 
       if (result == true) {
-        await ref.read(favoritesListProvider.notifier).updateFavorite(
+        await ref
+            .read(favoritesListProvider.notifier)
+            .updateFavorite(
               entry.copyWith(
                 name: nameTextController.text.isNotEmpty ? nameTextController.text : entry.name,
                 brokerUrl: brokerTextController.text,

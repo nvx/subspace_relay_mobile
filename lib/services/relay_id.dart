@@ -3,6 +3,7 @@ import 'package:convert/convert.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cryptography_flutter_plus/cryptography_flutter_plus.dart';
 import 'package:cryptography_plus/cryptography_plus.dart';
 
 import 'package:subspace_relay_mobile/services/prefs.dart';
@@ -12,10 +13,17 @@ part 'relay_id.freezed.dart';
 
 @freezed
 sealed class RelayId with _$RelayId {
+  static const _pbkdfIterations = 20;
+  static const _pbkdfBits = 16 * 8;
   const factory RelayId({required String relayId, required String mqttClientId, required SecretKey cryptoKey}) = _RelayId;
 
   static Future<RelayId> fromString(String relayId) async {
-    final pbkdf2 = Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: 20, bits: 16 * 8);
+    final pbkdf2 = FlutterPbkdf2(
+      fallback: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: _pbkdfIterations, bits: _pbkdfBits),
+      macAlgorithm: Hmac.sha256(),
+      iterations: _pbkdfIterations,
+      bits: _pbkdfBits,
+    );
 
     final mqttClientId = hex.encode(await (await pbkdf2.deriveKeyFromPassword(password: relayId, nonce: utf8.encode('mqtt-id'))).extractBytes());
 
@@ -35,7 +43,7 @@ Future<RelayId> relayId(Ref ref) async {
   }
 
   if (relayId == null || relayId.isEmpty) {
-    relayId = Uuid().v7().replaceAll('-', '');
+    relayId = Uuid().v4().replaceAll('-', '');
     await prefs.setString(kPrefsRelayId, relayId);
   }
 
