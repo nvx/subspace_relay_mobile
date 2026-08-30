@@ -103,6 +103,7 @@ class HceRelay extends _$HceRelay {
     final relayInfo = $pb.RelayInfo(
       connectionType: $pb.ConnectionType.CONNECTION_TYPE_NFC,
       supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_CARD],
+      protocol: $pb.Protocol.PROTOCOL_14443A_4,
       supportsShortcut: true,
       requiresAidList: true,
       userAgent: '$appName/${await ref.watch(appVersionProvider.future)}',

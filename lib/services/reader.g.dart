@@ -93,7 +93,7 @@ final class ReaderRelayProvider
   }
 }
 
-String _$readerRelayHash() => r'ddfe403220e04579d42d816456495c32945c1b13';
+String _$readerRelayHash() => r'd268abe57b5baea3df349b75ac3bbc85a96311ea';
 
 final class ReaderRelayFamily extends $Family
     with

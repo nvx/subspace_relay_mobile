@@ -66,11 +66,23 @@ class ReaderRelay extends _$ReaderRelay {
       return null;
     }
 
+    $pb.Protocol? protocol;
     final nfcA = NfcAAndroid.from(reader);
     if (nfcA != null) {
-      // TODO: Running this breaks IsoDepAndroid, needs fresh tag - reimplement IsoDep on NfcA ourselves?
-      final ret = await nfcA.transceive(Uint8List.fromList([0xE0, 0x80]));
-      print('ats: ${hex.encode(ret)}');
+      protocol = $pb.Protocol.PROTOCOL_14443A_4;
+      // TODO: Running this breaks IsoDepAndroid, needs fresh tag - reimplement IsoDep ourselves?
+      // final ret = await nfcA.transceive(Uint8List.fromList([0xE0, 0x80]));
+      // print('ats: ${hex.encode(ret)}');
+    } else {
+      final nfcB = NfcBAndroid.from(reader);
+      if (nfcB != null) {
+        protocol = $pb.Protocol.PROTOCOL_14443B_4;
+      } else {
+        final nfcF = NfcFAndroid.from(reader);
+        if (nfcF != null) {
+          protocol = $pb.Protocol.PROTOCOL_FELICA;
+        }
+      }
     }
 
     final isoTag = IsoDepAndroid.from(reader);
@@ -89,6 +101,7 @@ class ReaderRelay extends _$ReaderRelay {
     final relayInfo = $pb.RelayInfo(
       connectionType: $pb.ConnectionType.CONNECTION_TYPE_NFC,
       supportedPayloadTypes: [$pb.PayloadType.PAYLOAD_TYPE_PCSC_READER],
+      protocol: protocol,
       userAgent: '$appName/${await ref.watch(appVersionProvider.future)}',
       uid: isoTag.tag.id,
       atqa: nfcA?.atqa,
